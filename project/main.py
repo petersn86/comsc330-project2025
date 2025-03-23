@@ -4,12 +4,26 @@
 #
 
 import data_extraction
+import build_gui
+from build_gui import Tk
 
-classes = data_extraction.extractClasses()
-print(classes)
+runList         = []
+window          = Tk()
 
-sections = data_extraction.extractSections(classes)
-print(sections)
+frame_1     = build_gui.buildFrame(window)
+frame_2     = build_gui.buildFrame(window)
 
-df = data_extraction.createDataFrame(sections)
-print(df)
+frame_1.pack(fill="both", expand=True)
+
+build_gui.frameFill_START(frame_1, runList)
+build_gui.states.append(frame_1)
+
+build_gui.frameFill_PRIMARY(frame_2, runList)
+build_gui.states.append(frame_2)
+
+#loop window
+window.geometry("800x600")
+window.configure(bg = "#FFFFFF")
+window.mainloop()
+
+print(runList)
