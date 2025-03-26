@@ -1,11 +1,10 @@
 import tkinter as tk
-from tkinter import filedialog, Frame, Tk, Canvas, Button, PhotoImage
+from tkinter import filedialog, Frame, Tk, Canvas, Button, PhotoImage, StringVar, OptionMenu
 import os
 
 assetPath   = 'project\\assets'
-states      = []
-stateIndex  = 0
 folderPath  = ''
+runList     = []
 
 def openFolder(frame):
     global folderPath
@@ -14,27 +13,28 @@ def openFolder(frame):
         frame.canvas.itemconfig(frame.selected_path, text=f"Selected Path: {folderPath}")   # config text
         frame.button_2.place(x=329.0, y=486.0, width=122.0, height=44.0)                    # for button_2
 
-def nextFrame():
-    global stateIndex
-    states[stateIndex].pack_forget()
-    stateIndex += 1
-    states[stateIndex].pack(fill="both", expand=True)
+def closeWindow(window):
+    window.destroy()
 
 # Search directory for RUN files
 def searchPath(dir, runList):
-    for roots, dirs, files in os.walk(dir):
+    try:
+        files = os.listdir(dir)
         for file in files:
             if file.endswith('.RUN'):
                 runList.append(file)
+    except FileNotFoundError:
+        print(f"Error: The directory '{dir}' was not found.")
+    except PermissionError:
+        print(f"Error: Permission denied to access the directory '{dir}'.")
     return runList
-
 
 def buildFrame(window):
     frame = Frame(window, bg="#FFFFFF")
     return frame
 
-def frameFill_START(frame, runList):
-
+def frameFill_START(frame):
+    global runList
     # Fill frame with canvas
     frame.canvas = Canvas(
         frame,
@@ -92,11 +92,12 @@ def frameFill_START(frame, runList):
     frame.button_image_2 = PhotoImage(file=assetPath + '\\button_2.png')
     frame.button_2 = Button(
         frame, image=frame.button_image_2, borderwidth=0, highlightthickness=0,
-        bg="#FFFFFF", command= lambda: (searchPath(folderPath, runList), nextFrame()), relief="flat"
+        bg="#FFFFFF", command= lambda: (searchPath(folderPath, runList), closeWindow(frame.winfo_toplevel())), relief="flat"
     )
 
-def frameFill_PRIMARY(frame, runList):
-
+def frameFill_PRIMARY(frame):
+    global runList
+    
     # Fill frame with canvas
     frame.canvas = Canvas(
         frame, bg="#FFFFFF", height=600, width=800, bd=0,
@@ -125,4 +126,51 @@ def frameFill_PRIMARY(frame, runList):
         fill="#000000", font=("Inter SemiBold", 30 * -1)
     )
 
+    dropdown_var = StringVar()
+    dropdown_var.set("Options")
+
+    if runList:
+        dropdown_menu = OptionMenu(
+            frame,
+            dropdown_var,
+            *runList
+        )
+
+        dropdown_menu.config(
+            font=("Arial", 12),
+            bg="#F0F0F0",
+            fg="#333333",
+            activebackground="#545454",
+            activeforeground="white",
+            relief="flat",
+            highlightthickness=0,
+            bd=2,
+            width=10
+        )
+        
+        dropdown_menu.place(x=30.0, y=180.0)
+
+    dropdown_var_2 = StringVar()
+    dropdown_var_2.set("Action")
+
+    options = ["Option 1", "Option 2", "Option 3", "Option 4"]
+    dropdown_menu = OptionMenu(
+        frame, 
+        dropdown_var_2,
+        *options
+    )
+
+    dropdown_menu.config(
+        font=("Arial", 8),
+        bg="#F0F0F0",
+        fg="#333333",
+        activebackground="#545454",
+        activeforeground="white",
+        relief="flat",
+        highlightthickness=0,
+        bd=2,
+        width=10
+    )
+
+    dropdown_menu.place(x=670.0, y=70.0)
 
