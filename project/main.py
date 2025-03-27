@@ -16,11 +16,11 @@ window_start.mainloop()
 window_main     = Tk()
 frame_2         = build_gui.buildFrame(window_main)
 
-window_main.geometry("800x600")
+window_main.geometry("1080x720")
 window_main.configure(bg="#FFFFFF")
-window_main.resizable(False, False)
 frame_2.pack(fill="both", expand=True)
 build_gui.frameFill_PRIMARY(frame_2)
+build_gui.frameSet_GROUPS(frame_2)
 
 window_main.mainloop()
 

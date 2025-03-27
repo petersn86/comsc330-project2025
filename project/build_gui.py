@@ -53,7 +53,7 @@ def frameFill_START(frame):
 
     # Fill canvas with text
     frame.canvas.create_text(
-        21.0, 21.0, anchor="nw", text="Welcome to GPA Analyzer",
+        21.0, 21.0, anchor="nw", text="Welcome to GPA Analyzer!",
         fill="#000000", font=("Inter SemiBold", 33 * -1)
     )
 
@@ -100,18 +100,18 @@ def frameFill_PRIMARY(frame):
     
     # Fill frame with canvas
     frame.canvas = Canvas(
-        frame, bg="#FFFFFF", height=600, width=800, bd=0,
+        frame, bg="#FFFFFF", height=1080, width=1920, bd=0,
         highlightthickness=0, relief="ridge"
     )
 
     frame.canvas.place(x=0, y=0)
     frame.canvas.create_rectangle(
-        0.0, 0.0, 819.0, 111.0, fill="#D9D9D9", outline=""
+        0.0, 0.0, 2000.0, 111.0, fill="#D9D9D9", outline=""
     )
 
     # Fill canvas with text
     frame.canvas.create_text(
-        21.0, 21.0, anchor="nw", text="Welcome to GPA Analyzer",
+        21.0, 21.0, anchor="nw", text="GPA Analyzer",
         fill="#000000", font=("Inter SemiBold", 33 * -1)
     )
 
@@ -172,5 +172,12 @@ def frameFill_PRIMARY(frame):
         width=10
     )
 
-    dropdown_menu.place(x=670.0, y=70.0)
+    dropdown_menu.place(x=910.0, y=70.0)
 
+def frameSet_GROUPS(frame):
+
+    frame.image_ref = PhotoImage(file=assetPath + '\\image_1.png')
+    frame.canvas.create_image(252.0, 450.0, image=frame.image_ref)
+
+    frame_child = tk.Frame(frame, bg ="#D9D9D9", width=500, height=540)
+    frame_child.place(x=550, y=135)
