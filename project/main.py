@@ -1,4 +1,4 @@
-import data_extraction
+import parser
 import build_gui
 from build_gui import Tk
 
@@ -25,9 +25,9 @@ build_gui.frameSet_GROUPS(frame_2)
 
 def runSelect(*args):
     global df
-    classes     = data_extraction.extractClasses(build_gui.folderPath, frame_2.dropdown_var.get())
-    sections    = data_extraction.extractSections(classes)
-    df          = data_extraction.createDataFrame(sections)
+    classes     = parser.extractClasses(build_gui.folderPath, frame_2.dropdown_var.get())
+    sections    = parser.extractSections(classes)
+    df          = parser.createDataFrame(sections)
     build_gui.showDataframe(frame_2.frame_child, df)
 
 frame_2.dropdown_var.trace("w", runSelect)
