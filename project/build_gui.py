@@ -1,10 +1,10 @@
 import tkinter as tk
-from tkinter import filedialog, Frame, Tk, Canvas, Button, PhotoImage, StringVar, OptionMenu
+from tkinter import filedialog, Frame, Tk, Canvas, Button, PhotoImage, StringVar, OptionMenu, ttk, messagebox
 import os
 
 assetPath   = 'project\\assets'
-folderPath  = ''
 runList     = []
+state       = {"state": False}
 
 def openFolder(frame):
     global folderPath
@@ -14,7 +14,35 @@ def openFolder(frame):
         frame.button_2.place(x=329.0, y=486.0, width=122.0, height=44.0)                    # for button_2
 
 def closeWindow(window):
-    window.destroy()
+    if any(file.endswith('.RUN') for file in os.listdir(folderPath)):
+        window.destroy()
+        state["state"] = True
+    else:
+        messagebox.showinfo("Stop!", "No RUN Files Detected... Please Select Another Directory")
+
+
+def showDataframe(frame, df):
+    tree = ttk.Treeview(frame, columns=list(df.columns), show="headings")
+
+    for col in df.columns:
+        tree.heading(col, text=col)
+        tree.column(col, width=100, anchor="center", stretch=tk.NO)
+
+    # Insert data into the Treeview
+    for index, row in df.iterrows():
+        tree.insert("", "end", values=list(row))
+    
+    # Grid configuration to make the table fill the entire frame
+    tree.grid(row=0, column=0, sticky="nsew")
+
+    vsb = tk.Scrollbar(frame, orient="vertical", command=tree.yview)
+    tree.configure(yscrollcommand=vsb.set)
+    vsb.grid(row=0, column=1, sticky="ns")
+
+    hsb = tk.Scrollbar(frame, orient="horizontal", command=tree.xview)
+    tree.configure(xscrollcommand=hsb.set)
+    hsb.grid(row=1, column=0, sticky="ew")
+
 
 # Search directory for RUN files
 def searchPath(dir, runList):
@@ -126,17 +154,17 @@ def frameFill_PRIMARY(frame):
         fill="#000000", font=("Inter SemiBold", 30 * -1)
     )
 
-    dropdown_var = StringVar()
-    dropdown_var.set("Options")
+    frame.dropdown_var = StringVar()
+    frame.dropdown_var.set("Options")
 
     if runList:
-        dropdown_menu = OptionMenu(
+        frame.dropdown_menu = OptionMenu(
             frame,
-            dropdown_var,
+            frame.dropdown_var,
             *runList
         )
 
-        dropdown_menu.config(
+        frame.dropdown_menu.config(
             font=("Arial", 12),
             bg="#F0F0F0",
             fg="#333333",
@@ -148,7 +176,7 @@ def frameFill_PRIMARY(frame):
             width=10
         )
         
-        dropdown_menu.place(x=30.0, y=180.0)
+        frame.dropdown_menu.place(x=30.0, y=180.0)
 
     dropdown_var_2 = StringVar()
     dropdown_var_2.set("Action")
@@ -179,5 +207,5 @@ def frameSet_GROUPS(frame):
     frame.image_ref = PhotoImage(file=assetPath + '\\image_1.png')
     frame.canvas.create_image(252.0, 450.0, image=frame.image_ref)
 
-    frame_child = tk.Frame(frame, bg ="#D9D9D9", width=500, height=540)
-    frame_child.place(x=550, y=135)
+    frame.frame_child = tk.Frame(frame, bg ="#D9D9D9", width=500, height=540)
+    frame.frame_child.grid(row=1, column=0, sticky="nsew", padx=550, pady=135)
