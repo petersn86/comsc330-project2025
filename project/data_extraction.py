@@ -9,12 +9,12 @@ from collections import defaultdict
 
 # Variables
 dir         = 'test_data\\'                                                         # directory path                        (will be dynamically selected later)
-semester    = 'SPRING25'                                                            # semester                              (will be dynamically selected later)
+semester    = 'SPRING25.RUN'                                                            # semester                              (will be dynamically selected later)
 
 # Open RUN file and extract classes
-def extractClasses():
+def extractClasses(dir, semester):
     classes = []
-    with open(dir + semester + '.RUN', 'r', encoding= "utf-8") as file:
+    with open(dir + "/" + semester, 'r', encoding= "utf-8") as file:
         next(file)
         for line in file:
             classes.append(line.strip())
