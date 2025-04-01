@@ -28,6 +28,11 @@ def runSelect(*args):
     classes     = parser.extractClasses(build_gui.folderPath, frame_2.dropdown_var.get())
     sections    = parser.extractSections(classes)
     df          = parser.createDataFrame(sections)
+
+    print(classes)
+    print(sections)
+
+    build_gui.showGroups(frame_2.image_frame, sections)
     build_gui.showDataframe(frame_2.frame_child, df)
 
 frame_2.dropdown_var.trace("w", runSelect)

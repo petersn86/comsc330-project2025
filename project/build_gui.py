@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import filedialog, Frame, Tk, Canvas, Button, PhotoImage, StringVar, OptionMenu, ttk, messagebox
 import os
+from collections import defaultdict
 
 assetPath   = 'project\\assets'
 runList     = []
@@ -19,7 +20,6 @@ def closeWindow(window):
         state["state"] = True
     else:
         messagebox.showinfo("Stop!", "No RUN Files Detected... Please Select Another Directory")
-
 
 def showDataframe(frame, df):
     tree = ttk.Treeview(frame, columns=list(df.columns), show="headings")
@@ -43,8 +43,6 @@ def showDataframe(frame, df):
     tree.configure(xscrollcommand=hsb.set)
     hsb.grid(row=1, column=0, sticky="ew")
 
-
-# Search directory for RUN files
 def searchPath(dir, runList):
     try:
         files = os.listdir(dir)
@@ -204,8 +202,39 @@ def frameFill_PRIMARY(frame):
 
 def frameSet_GROUPS(frame):
 
-    frame.image_ref = PhotoImage(file=assetPath + '\\image_1.png')
+    frame.image_ref         = PhotoImage(file=assetPath + '\\image_1.png')
     frame.canvas.create_image(252.0, 450.0, image=frame.image_ref)
+    frame.image_frame       = tk.Frame(frame, width=440, height=430, bg = "#D9D9D9")
+    frame.image_frame.place(x=252.0 - 440 / 2, y=450.0 - 430 / 2, width=440, height=430)
 
-    frame.frame_child = tk.Frame(frame, bg ="#D9D9D9", width=500, height=540)
+    frame.frame_child       = tk.Frame(frame, bg ="#D9D9D9", width=500, height=540)
     frame.frame_child.grid(row=1, column=0, sticky="nsew", padx=550, pady=135)
+
+def showGroups(frame, sections):
+    course_vars = {}                    # Store main course checkboxes' states
+    section_vars = defaultdict(list)    # Store section checkboxes' states
+
+    style = ttk.Style()
+    style.configure("TCheckbutton", font=("Arial", 13), background="#D9D9D9")
+
+    def toggle_sections(course):
+        state = course_vars[course].get()
+        for var in section_vars[course]:
+            var.set(state)
+
+    for course, section_list in sections.items():
+        course_vars[course] = tk.IntVar()
+        course_chk = ttk.Checkbutton(
+            frame, text=course, variable=course_vars[course], command=lambda c=course: toggle_sections(c)
+        )
+        course_chk.pack(anchor="w", pady=2)
+
+        # Section-level checkboxes
+        for section in section_list:
+            section_var = tk.IntVar()
+            section_vars[course].append(section_var)
+
+            section_chk = ttk.Checkbutton(
+                frame, text=section, variable=section_var
+            )
+            section_chk.pack(anchor="w", padx=20)
