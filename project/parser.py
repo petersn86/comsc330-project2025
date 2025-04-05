@@ -7,10 +7,6 @@ import pandas as pd
 import csv
 from collections import defaultdict
 
-# Variables
-dir         = 'test_data\\'                                                         # directory path                        (will be dynamically selected later)
-semester    = 'SPRING25.RUN'                                                            # semester                              (will be dynamically selected later)
-
 # Open RUN file and extract classes
 def extractClasses(dir, semester):
     classes = []
@@ -22,10 +18,10 @@ def extractClasses(dir, semester):
     return classes
 
 # Open GRP files and extract sections
-def extractSections(classes):
+def extractSections(dir, classes):
     sections = defaultdict(list)
     for i in range(len(classes)):
-        with open(dir + classes[i], 'r', encoding ="utf-8") as file:
+        with open(dir + "/" + classes[i], 'r', encoding ="utf-8") as file:
             next(file)
             for line in file:
                 sections[(classes[i])[:-4]].append(line.strip())
@@ -33,11 +29,11 @@ def extractSections(classes):
     return sections
 
 # Open SEC files and store data into dataframes
-def createDataFrame(sections):
+def createDataFrame(dir, sections):
     df = pd.DataFrame(columns=["Name", "ID", "Class", "Section", "Grade"]) 
     for key in sections.keys():
         for sec_files in sections[key]:
-            with open(dir + sec_files, 'r', encoding= "utf-8") as file:
+            with open(dir + "/" + sec_files, 'r', encoding= "utf-8") as file:
                 next(file)
                 reader = csv.reader(file)
                 for line in file:

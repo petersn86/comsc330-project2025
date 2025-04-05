@@ -22,26 +22,28 @@ def closeWindow(window):
         messagebox.showinfo("Stop!", "No RUN Files Detected... Please Select Another Directory")
 
 def showDataframe(frame, df):
-    tree = ttk.Treeview(frame, columns=list(df.columns), show="headings")
+
+    for widget in frame.winfo_children():
+        widget.destroy()
+    
+    container = tk.Frame(frame)
+    container.pack(fill="both", expand=True)
+
+    tree = ttk.Treeview(container, columns=list(df.columns), show="headings")
 
     for col in df.columns:
         tree.heading(col, text=col)
         tree.column(col, width=100, anchor="center", stretch=tk.NO)
 
-    # Insert data into the Treeview
     for index, row in df.iterrows():
         tree.insert("", "end", values=list(row))
-    
-    # Grid configuration to make the table fill the entire frame
-    tree.grid(row=0, column=0, sticky="nsew")
 
-    vsb = tk.Scrollbar(frame, orient="vertical", command=tree.yview)
-    tree.configure(yscrollcommand=vsb.set)
-    vsb.grid(row=0, column=1, sticky="ns")
+    tree.pack(fill="both", expand=True, side="left")
 
     hsb = tk.Scrollbar(frame, orient="horizontal", command=tree.xview)
     tree.configure(xscrollcommand=hsb.set)
-    hsb.grid(row=1, column=0, sticky="ew")
+    hsb.pack(side="bottom", fill="x")
+
 
 def searchPath(dir, runList):
     try:
@@ -201,31 +203,62 @@ def frameFill_PRIMARY(frame):
     dropdown_menu.place(x=910.0, y=70.0)
 
 def frameSet_GROUPS(frame):
-
-    frame.image_ref         = PhotoImage(file=assetPath + '\\image_1.png')
+    # Load and display image
+    frame.image_ref = PhotoImage(file=assetPath + '\\image_1.png')
     frame.canvas.create_image(252.0, 450.0, image=frame.image_ref)
-    frame.image_frame       = tk.Frame(frame, width=440, height=430, bg = "#D9D9D9")
-    frame.image_frame.place(x=252.0 - 440 / 2, y=450.0 - 430 / 2, width=440, height=430)
 
-    frame.frame_child       = tk.Frame(frame, bg ="#D9D9D9", width=500, height=540)
-    frame.frame_child.grid(row=1, column=0, sticky="nsew", padx=550, pady=135)
+    # Create and place image frame using absolute coordinates
+    frame.image_frame = tk.Frame(frame, width=440, height=430, bg="#D9D9D9")
+    frame.image_frame.place(x=252.0 - 220, y=450.0 - 215)  # Centered at (252, 450)
+
+    # Create a child frame and use pack (or grid, but not both!)
+    frame.frame_child = tk.Frame(frame, bg="#D9D9D9", width=500, height=540)
+    frame.frame_child.place(x=550, y=135, width=500, height=540)
+
+import tkinter as tk
+from tkinter import ttk
+from collections import defaultdict
 
 def showGroups(frame, sections):
+
+    frame.config(bg="#D9D9D9")
+
+    for widget in frame.winfo_children():
+        widget.destroy()
+
     course_vars = {}                    # Store main course checkboxes' states
     section_vars = defaultdict(list)    # Store section checkboxes' states
 
     style = ttk.Style()
     style.configure("TCheckbutton", font=("Arial", 13), background="#D9D9D9")
+    style.configure("TCheckbutton", indicatorbackground="#D9D9D9", indicatorforeground="#D9D9D9")
+    style.configure("Vertical.TScrollbar", troughcolor="#D9D9D9", background="#D9D9D9", arrowcolor="#D9D9D9")
 
     def toggle_sections(course):
         state = course_vars[course].get()
         for var in section_vars[course]:
             var.set(state)
 
+    # Create a Canvas widget and a vertical Scrollbar
+    canvas = tk.Canvas(frame, height=430, width=420, bg="#D9D9D9", highlightthickness=0)
+    scrollbar = ttk.Scrollbar(frame, orient="vertical", command=canvas.yview)
+
+    scrollbar.pack(side="right", fill="y", pady=5)
+    canvas.pack(side="left", fill="both", expand=True)
+
+    container = tk.Frame(canvas, bg="#D9D9D9")
+
+    canvas.create_window((0, 0), window=container, anchor="nw")
+
+    def on_frame_configure(event):
+        canvas.configure(scrollregion=canvas.bbox("all"), bg = "#D9D9D9")
+
+    container.bind("<Configure>", on_frame_configure)
+
     for course, section_list in sections.items():
         course_vars[course] = tk.IntVar()
         course_chk = ttk.Checkbutton(
-            frame, text=course, variable=course_vars[course], command=lambda c=course: toggle_sections(c)
+            container, text=course, variable=course_vars[course], command=lambda c=course: toggle_sections(c)
         )
         course_chk.pack(anchor="w", pady=2)
 
@@ -235,6 +268,9 @@ def showGroups(frame, sections):
             section_vars[course].append(section_var)
 
             section_chk = ttk.Checkbutton(
-                frame, text=section, variable=section_var
+                container, text=section, variable=section_var
             )
             section_chk.pack(anchor="w", padx=20)
+
+    # Link the scrollbar to the canvas
+    canvas.configure(yscrollcommand=scrollbar.set)

@@ -26,11 +26,8 @@ build_gui.frameSet_GROUPS(frame_2)
 def runSelect(*args):
     global df
     classes     = parser.extractClasses(build_gui.folderPath, frame_2.dropdown_var.get())
-    sections    = parser.extractSections(classes)
-    df          = parser.createDataFrame(sections)
-
-    print(classes)
-    print(sections)
+    sections    = parser.extractSections(build_gui.folderPath, classes)
+    df          = parser.createDataFrame(build_gui.folderPath, sections)
 
     build_gui.showGroups(frame_2.image_frame, sections)
     build_gui.showDataframe(frame_2.frame_child, df)
