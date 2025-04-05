@@ -215,10 +215,6 @@ def frameSet_GROUPS(frame):
     frame.frame_child = tk.Frame(frame, bg="#D9D9D9", width=500, height=540)
     frame.frame_child.place(x=550, y=135, width=500, height=540)
 
-import tkinter as tk
-from tkinter import ttk
-from collections import defaultdict
-
 def showGroups(frame, sections):
 
     frame.config(bg="#D9D9D9")
