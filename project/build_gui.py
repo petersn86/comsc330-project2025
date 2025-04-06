@@ -3,9 +3,16 @@ from tkinter import filedialog, Frame, Tk, Canvas, Button, PhotoImage, StringVar
 import os
 from collections import defaultdict
 
-assetPath   = 'project\\assets'
-runList     = []
-state       = {"state": False}
+assetPath       = 'project\\assets'
+runList         = []
+state           = {"state": False}
+
+course_vars     = {}                    # Store main course checkboxes' states
+section_vars    = defaultdict(list)     # Store section checkboxes' states
+
+ticked_courses  = []
+ticked_sections = {}
+
 
 def openFolder(frame):
     global folderPath
@@ -42,8 +49,12 @@ def showDataframe(frame, df):
 
     hsb = tk.Scrollbar(frame, orient="horizontal", command=tree.xview)
     tree.configure(xscrollcommand=hsb.set)
-    hsb.pack(side="bottom", fill="x")
 
+    vsb = tk.Scrollbar(container, orient="vertical", command=tree.yview)
+    tree.configure(yscrollcommand=vsb.set)
+    
+    vsb.place(relx=0.97, rely=0, relwidth=0.03, relheight=1.0)
+    hsb.place(x=0, rely=1.0, relwidth=1.0, anchor="sw")
 
 def searchPath(dir, runList):
     try:
@@ -216,14 +227,10 @@ def frameSet_GROUPS(frame):
     frame.frame_child.place(x=550, y=135, width=500, height=540)
 
 def showGroups(frame, sections):
-
     frame.config(bg="#D9D9D9")
 
     for widget in frame.winfo_children():
         widget.destroy()
-
-    course_vars = {}                    # Store main course checkboxes' states
-    section_vars = defaultdict(list)    # Store section checkboxes' states
 
     style = ttk.Style()
     style.configure("TCheckbutton", font=("Arial", 13), background="#D9D9D9")
@@ -234,6 +241,12 @@ def showGroups(frame, sections):
         state = course_vars[course].get()
         for var in section_vars[course]:
             var.set(state)
+
+    def update_course_checkbox(course):
+        if any(var.get() for var in section_vars[course]):
+            course_vars[course].set(1)
+        else:
+            course_vars[course].set(0)
 
     # Create a Canvas widget and a vertical Scrollbar
     canvas = tk.Canvas(frame, height=430, width=420, bg="#D9D9D9", highlightthickness=0)
@@ -247,7 +260,7 @@ def showGroups(frame, sections):
     canvas.create_window((0, 0), window=container, anchor="nw")
 
     def on_frame_configure(event):
-        canvas.configure(scrollregion=canvas.bbox("all"), bg = "#D9D9D9")
+        canvas.configure(scrollregion=canvas.bbox("all"), bg="#D9D9D9")
 
     container.bind("<Configure>", on_frame_configure)
 
@@ -263,10 +276,22 @@ def showGroups(frame, sections):
             section_var = tk.IntVar()
             section_vars[course].append(section_var)
 
+            # When a section checkbox is clicked, update the course checkbox
             section_chk = ttk.Checkbutton(
-                container, text=section, variable=section_var
+                container, text=section, variable=section_var, command=lambda c=course: update_course_checkbox(c)
             )
             section_chk.pack(anchor="w", padx=20)
 
     # Link the scrollbar to the canvas
     canvas.configure(yscrollcommand=scrollbar.set)
+
+def checkTicked(df):
+    for course, var in course_vars.items():
+        if var.get() == 1:  # If course is ticked
+            ticked_courses.append(course)
+            ticked_sections[course] = []  # Initialize empty list for sections
+
+            for i, section_var in enumerate(section_vars.get(course, [])):
+                if section_var.get() == 1:
+                    section_value = df.loc[df['Class'] == course, 'Section'].iloc[i]
+                    ticked_sections[course].append(section_value)
