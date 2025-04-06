@@ -28,7 +28,7 @@ def extractSections(dir, classes):
     file.close()
     return sections
 
-# Open SEC files and store data into dataframes
+# Open SEC files and store data into dataframe
 def createDataFrame(dir, sections):
     df = pd.DataFrame(columns=["Name", "ID", "Class", "Section", "Grade"]) 
     for key in sections.keys():
