@@ -1,6 +1,6 @@
 import parser
 import build_gui
-from build_gui import Tk
+from build_gui import Tk, messagebox
 
 window_start            = Tk()
 frame_1                 = build_gui.buildFrame(window_start)
@@ -32,7 +32,25 @@ def runSelect(*args):
     build_gui.showGroups(frame_2.image_frame, sections)
     build_gui.showDataframe(frame_2.frame_child, df)
 
+def runZTest():
+    selected_count = sum(var.get() for course in build_gui.section_vars for var in build_gui.section_vars[course])
+    if selected_count != 1:
+        if selected_count == 0:
+            messagebox.showinfo("Stop!", "Please Select One of the Sections for this Action")
+            return
+        else:
+            messagebox.showinfo("Stop!", "You Can Only Select One Section for this Action")
+            return
+    messagebox.showinfo("Good Boy")
+
+
+def runAction(*args):
+    if frame_2.dropdown_var_2.get() == "Z-Test":
+        runZTest()
+
 frame_2.dropdown_var.trace("w", runSelect)
+
+frame_2.dropdown_var_2.trace("w", runAction)
 
 if build_gui.state["state"] == True: 
     window_main.mainloop()

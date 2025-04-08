@@ -189,13 +189,13 @@ def frameFill_PRIMARY(frame):
         
         frame.dropdown_menu.place(x=30.0, y=180.0)
 
-    dropdown_var_2 = StringVar()
-    dropdown_var_2.set("Action")
+    frame.dropdown_var_2 = StringVar()
+    frame.dropdown_var_2.set("Action")
 
-    options = ["Option 1", "Option 2", "Option 3", "Option 4"]
+    options = ["Option 1", "Option 2", "Option 3", "Z-Test"]
     dropdown_menu = OptionMenu(
         frame, 
-        dropdown_var_2,
+        frame.dropdown_var_2,
         *options
     )
 
