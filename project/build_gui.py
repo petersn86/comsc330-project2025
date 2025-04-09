@@ -40,7 +40,7 @@ def showDataframe(frame, df):
 
     for col in df.columns:
         tree.heading(col, text=col)
-        tree.column(col, width=100, anchor="center", stretch=tk.NO)
+        tree.column(col, width=100, anchor="center", stretch=tk.YES)
 
     for index, row in df.iterrows():
         tree.insert("", "end", values=list(row))
@@ -136,14 +136,20 @@ def frameFill_START(frame):
 
 def frameFill_PRIMARY(frame):
     global runList
-    
+
     # Fill frame with canvas
     frame.canvas = Canvas(
         frame, bg="#FFFFFF", height=1080, width=1920, bd=0,
-        highlightthickness=0, relief="ridge"
+        highlightthickness=0, relief="ridge", scrollregion=(0, 0, 2000, 1080) # Make canvas scrollable
     )
 
     frame.canvas.place(x=0, y=0)
+
+    # Add scrollbars
+    yscrollbar = tk.Scrollbar(frame, orient="vertical", command=frame.canvas.yview)
+    yscrollbar.place(relx=1.0, rely=0.0, relheight=1.0, anchor='ne')
+    frame.canvas.configure(yscrollcommand=yscrollbar.set)
+
     frame.canvas.create_rectangle(
         0.0, 0.0, 2000.0, 111.0, fill="#D9D9D9", outline=""
     )
@@ -170,7 +176,7 @@ def frameFill_PRIMARY(frame):
 
     if runList:
         frame.dropdown_menu = OptionMenu(
-            frame,
+            frame.canvas,  # Place on the canvas
             frame.dropdown_var,
             *runList
         )
@@ -186,13 +192,13 @@ def frameFill_PRIMARY(frame):
             bd=2,
             width=10
         )
-        
-        frame.dropdown_menu.place(x=30.0, y=180.0)
+
+        frame.canvas.create_window(30.0, 180.0, window=frame.dropdown_menu, anchor="nw") # Place using create_window
 
     frame.dropdown_var_2 = StringVar()
     frame.dropdown_var_2.set("Action")
 
-    options = ["Option 1", "Option 2", "Option 3", "Z-Test"]
+    options = ["Display-GPA", "Option 2", "Option 3", "Z-Test"]
     dropdown_menu = OptionMenu(
         frame, 
         frame.dropdown_var_2,
@@ -266,8 +272,11 @@ def showGroups(frame, sections):
 
     for course, section_list in sections.items():
         course_vars[course] = tk.IntVar()
+        section_vars[course] = []  # Make sure it's initialized
+
         course_chk = ttk.Checkbutton(
-            container, text=course, variable=course_vars[course], command=lambda c=course: toggle_sections(c)
+            container, text=course, variable=course_vars[course],
+            command=lambda c=course: toggle_sections(c)
         )
         course_chk.pack(anchor="w", pady=2)
 
@@ -276,14 +285,25 @@ def showGroups(frame, sections):
             section_var = tk.IntVar()
             section_vars[course].append(section_var)
 
-            # When a section checkbox is clicked, update the course checkbox
+            def make_callback(c=course, v=section_var):
+                def callback():
+                    update_course_checkbox(c)
+                return callback
+
             section_chk = ttk.Checkbutton(
-                container, text=section, variable=section_var, command=lambda c=course: update_course_checkbox(c)
+                container, text=section, variable=section_var,
+                command=make_callback()
             )
             section_chk.pack(anchor="w", padx=20)
 
     # Link the scrollbar to the canvas
     canvas.configure(yscrollcommand=scrollbar.set)
+
+def unselectAll():
+    for course in course_vars:
+        course_vars[course].set(0)
+        for var in section_vars[course]:
+            var.set(0)
 
 def checkTicked(df):
     for course, var in course_vars.items():

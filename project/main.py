@@ -1,6 +1,8 @@
 import parser
 import build_gui
-from build_gui import Tk, messagebox
+import gpa_calculator
+import pandas   as    pd
+from build_gui import Tk, messagebox, defaultdict
 
 window_start            = Tk()
 frame_1                 = build_gui.buildFrame(window_start)
@@ -25,9 +27,10 @@ build_gui.frameSet_GROUPS(frame_2)
 
 def runSelect(*args):
     global df
-    classes             = parser.extractClasses(build_gui.folderPath, frame_2.dropdown_var.get())
-    sections            = parser.extractSections(build_gui.folderPath, classes)
-    df                  = parser.createDataFrame(build_gui.folderPath, sections)
+    build_gui.unselectAll()
+    classes                     = parser.extractClasses(build_gui.folderPath, frame_2.dropdown_var.get())
+    sections                    = parser.extractSections(build_gui.folderPath, classes)
+    df                          = parser.createDataFrame(build_gui.folderPath, sections)
 
     build_gui.showGroups(frame_2.image_frame, sections)
     build_gui.showDataframe(frame_2.frame_child, df)
@@ -43,10 +46,23 @@ def runZTest():
             return
     messagebox.showinfo("Good Boy")
 
+def runGPACalc():
+    build_gui.ticked_courses    = []
+    build_gui.ticked_sections   = {}
+    selected_count = sum(var.get() for course in build_gui.section_vars for var in build_gui.section_vars[course])
+    if selected_count == 0:
+        messagebox.showinfo("Stop!", "Please Select One of the Sections for this Action")
+        return
+    build_gui.checkTicked(df)
+    gpa_df = gpa_calculator.calcGPA(df, build_gui.ticked_sections)
+    build_gui.showDataframe(frame_2.frame_child, gpa_df)
+
 
 def runAction(*args):
-    if frame_2.dropdown_var_2.get() == "Z-Test":
+    if   frame_2.dropdown_var_2.get() == "Z-Test":
         runZTest()
+    elif frame_2.dropdown_var_2.get() == "Display-GPA":
+        runGPACalc()
 
 frame_2.dropdown_var.trace("w", runSelect)
 
@@ -54,3 +70,6 @@ frame_2.dropdown_var_2.trace("w", runAction)
 
 if build_gui.state["state"] == True: 
     window_main.mainloop()
+
+
+
