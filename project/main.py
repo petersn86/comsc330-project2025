@@ -1,6 +1,7 @@
 import parser
 import build_gui
 import gpa_calculator
+import student_list
 import pandas   as    pd
 from build_gui import Tk, messagebox, defaultdict
 
@@ -46,7 +47,7 @@ def runZTest():
         else:
             messagebox.showinfo("Stop!", "You Can Only Select One Section for this Action")
             return
-    messagebox.showinfo("Good Boy")
+    messagebox.showinfo("Continue")
 
 def runGPACalc():
     build_gui.ticked_courses    = []
@@ -59,12 +60,25 @@ def runGPACalc():
     gpa_df = gpa_calculator.calcGPA(df, build_gui.ticked_sections)
     build_gui.showDataframe(frame_2, gpa_df)
 
+def runStudentList():
+    build_gui.ticked_courses    = []
+    build_gui.ticked_sections   = {}
+    selected_count = sum(var.get() for course in build_gui.section_vars for var in build_gui.section_vars[course])
+    if selected_count == 0:
+            messagebox.showinfo("Stop!", "Please Select One of the Sections for this Action")
+            return
+    build_gui.checkTicked(sections)
+    good_df, work_df = student_list.classify_students(df, build_gui.ticked_sections)
+    concat = pd.concat([good_df, work_df], ignore_index=True)
+    build_gui.showDataframe(frame_2, concat)
 
 def runAction(*args):
     if   frame_2.dropdown_var_2.get() == "Z-Test":
         runZTest()
     elif frame_2.dropdown_var_2.get() == "Display-GPA":
         runGPACalc()
+    elif frame_2.dropdown_var_2.get() == "Student-List":
+        runStudentList()
 
 frame_2.dropdown_var.trace("w", runSelect)
 
@@ -72,3 +86,6 @@ frame_2.dropdown_var_2.trace("w", runAction)
 
 if build_gui.state["state"] == True: 
     window_main.mainloop()
+
+build_gui.checkTicked(sections)
+print(build_gui.ticked_sections)

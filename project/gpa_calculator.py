@@ -34,7 +34,7 @@ def calcGPA(df, course_dict):
     result = []
 
     for course, sections in course_dict.items():
-        course_df = temp[temp['Class'] == course]
+        course_df = temp[(temp['Class'] == course) & (temp['Section'].isin(sections))]
 
         course_avg = course_df['GPA'].mean()
         result.append([course, 'Course Average', course_avg])

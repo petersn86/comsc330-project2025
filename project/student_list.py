@@ -5,15 +5,27 @@
 
 import pandas as pd
 
-def classifiy_students(df):
-    # define grade categories
+def classify_students(df, sections_dict):
     good_grades = {'A', 'A-'}
     work_grades = {'D+', 'D', 'D-', 'F'}
+    
+    good_list = []
+    work_list = []
+    
+    for course, sections in sections_dict.items():
+        filtered_df = df[df['Section'].isin(sections)]
+        
+        for _, row in filtered_df[filtered_df['Grade'].isin(good_grades)].iterrows():
+            good_list.append((row['ID'], row['Name'], row['Grade'], course))
+        
+        for _, row in filtered_df[filtered_df['Grade'].isin(work_grades)].iterrows():
+            work_list.append((row['ID'], row['Name'], row['Grade'], course))
 
-    # Filter students based on their grades into lists
-    good_list = df[df['Grade'].isin(good_grades)]['Name'].tolist()
-    work_list = df[df['Grade'].isin(good_grades)]['Name'].tolist()
+    good_df = pd.DataFrame(good_list, columns=['Name', 'ID',  'Grade', 'Course'])
+    work_df = pd.DataFrame(work_list, columns=['Name', 'ID',  'Grade', 'Course'])
 
-    # Return the lists
-    return good_list, work_list
+    good_df['Category'] = 'Good'
+    work_df['Category'] = 'Work'
+
+    return good_df, work_df
 
