@@ -13,6 +13,25 @@ section_vars    = defaultdict(list)     # Store section checkboxes' states
 ticked_courses  = []
 ticked_sections = {}
 
+def downloadDataFrame(df):
+    global folderPath
+    filename = "dataframe.csv"
+
+    # Join directory path with filename
+    full_filename = os.path.join(folderPath, filename)
+
+    # Check if the file already exists
+    base_filename, extension = os.path.splitext(full_filename)
+    counter = 1
+    new_filename = full_filename
+
+    while os.path.exists(new_filename):
+        new_filename = f"{base_filename}({counter}){extension}"
+        counter += 1
+
+    # Save the dataframe as a CSV with the new filename
+    df.to_csv(new_filename, index=False)
+    messagebox.showinfo("Save Successful", f"DataFrame has been saved as {new_filename}")
 
 def openFolder(frame):
     global folderPath
@@ -30,10 +49,10 @@ def closeWindow(window):
 
 def showDataframe(frame, df):
 
-    for widget in frame.winfo_children():
+    for widget in frame.frame_child.winfo_children():
         widget.destroy()
     
-    container = tk.Frame(frame)
+    container = tk.Frame(frame.frame_child)
     container.pack(fill="both", expand=True)
 
     tree = ttk.Treeview(container, columns=list(df.columns), show="headings")
@@ -47,7 +66,7 @@ def showDataframe(frame, df):
 
     tree.pack(fill="both", expand=True, side="left")
 
-    hsb = tk.Scrollbar(frame, orient="horizontal", command=tree.xview)
+    hsb = tk.Scrollbar(frame.frame_child, orient="horizontal", command=tree.xview)
     tree.configure(xscrollcommand=hsb.set)
 
     vsb = tk.Scrollbar(container, orient="vertical", command=tree.yview)
@@ -55,6 +74,8 @@ def showDataframe(frame, df):
     
     vsb.place(relx=0.97, rely=0, relwidth=0.03, relheight=1.0)
     hsb.place(x=0, rely=1.0, relwidth=1.0, anchor="sw")
+
+    frame.button_4.config(command=lambda: downloadDataFrame(df))
 
 def searchPath(dir, runList):
     try:
@@ -198,7 +219,7 @@ def frameFill_PRIMARY(frame):
     frame.dropdown_var_2 = StringVar()
     frame.dropdown_var_2.set("Action")
 
-    options = ["Display-GPA", "Option 2", "Option 3", "Z-Test"]
+    options = ["Display-GPA", "Z-Test", "Student-List"]
     dropdown_menu = OptionMenu(
         frame, 
         frame.dropdown_var_2,
@@ -231,6 +252,15 @@ def frameSet_GROUPS(frame):
     # Create a child frame and use pack (or grid, but not both!)
     frame.frame_child = tk.Frame(frame, bg="#D9D9D9", width=500, height=540)
     frame.frame_child.place(x=550, y=135, width=500, height=540)
+
+    # BUTTON 4 (handles dataframe download)
+    frame.button_image_4 = PhotoImage(file=assetPath + '\\button_4.png')
+    frame.button_4 = Button(
+        frame, image=frame.button_image_4, borderwidth=0, highlightthickness=0,
+        bg="#FFFFFF", command= None, relief="flat"
+    )
+
+    frame.button_4.place(x=450 + 500 - frame.button_4.winfo_width(), y=135 + 540 + 10)
 
 def showGroups(frame, sections):
     frame.config(bg="#D9D9D9")
@@ -282,6 +312,9 @@ def showGroups(frame, sections):
 
         # Section-level checkboxes
         for section in section_list:
+            # Remove the ".sec" suffix from the section name
+            section_name = section.removesuffix(".sec")
+
             section_var = tk.IntVar()
             section_vars[course].append(section_var)
 
@@ -291,7 +324,7 @@ def showGroups(frame, sections):
                 return callback
 
             section_chk = ttk.Checkbutton(
-                container, text=section, variable=section_var,
+                container, text=section_name, variable=section_var,
                 command=make_callback()
             )
             section_chk.pack(anchor="w", padx=20)
@@ -305,13 +338,13 @@ def unselectAll():
         for var in section_vars[course]:
             var.set(0)
 
-def checkTicked(df):
+def checkTicked(section_dict):
     for course, var in course_vars.items():
-        if var.get() == 1:  # If course is ticked
+        if var.get() == 1:  # If the course is ticked
             ticked_courses.append(course)
-            ticked_sections[course] = []  # Initialize empty list for sections
-
-            for i, section_var in enumerate(section_vars.get(course, [])):
-                if section_var.get() == 1:
-                    section_value = df.loc[df['Class'] == course, 'Section'].iloc[i]
-                    ticked_sections[course].append(section_value)
+            ticked_sections[course] = []  # Initialize empty list for sections of the course
+            if course in section_dict:  # Check if the course with '.sec' is in section_dict
+                for i, section_name in enumerate(section_dict[course]):
+                    section_var = section_vars.get(course, [])[i]
+                    if section_var and section_var.get() == 1:
+                        ticked_sections[course].append(section_name[:-4])
