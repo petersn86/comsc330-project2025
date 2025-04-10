@@ -257,7 +257,7 @@ def frameSet_GROUPS(frame):
         bg="#FFFFFF", command= None, relief="flat"
     )
 
-    frame.button_4.place(x=450 + 500 - frame.button_4.winfo_width(), y=135 + 540 + 10)
+    frame.button_4.place(x=600 + 500 - frame.button_4.winfo_width(), y=95 + 540 + 10)
 
 def showGroups(frame, sections):
     frame.config(bg="#D9D9D9")
