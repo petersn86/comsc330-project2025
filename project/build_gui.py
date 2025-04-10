@@ -348,3 +348,18 @@ def checkTicked(section_dict):
                     section_var = section_vars.get(course, [])[i]
                     if section_var and section_var.get() == 1:
                         ticked_sections[course].append(section_name[:-4])
+
+def shake_frame(frame, root):
+    original_x = frame.winfo_x()
+    original_y = frame.winfo_y()
+    
+    def shake(x_offset, count, move_distance):
+        if count > 0:
+            frame.place(x=x_offset, y=original_y)
+            next_x_offset = x_offset + move_distance if count % 2 == 0 else x_offset - move_distance
+            next_move_distance = move_distance * 0.8  # Reduce distance by 20% each time
+            root.after(50, shake, next_x_offset, count - 1, next_move_distance)
+        else:
+            frame.place(x=original_x, y=original_y)
+    
+    shake(original_x, 10, 10)
