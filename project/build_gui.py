@@ -241,15 +241,12 @@ def frameFill_PRIMARY(frame):
     dropdown_menu.place(x=910.0, y=70.0)
 
 def frameSet_GROUPS(frame):
-    # Load and display image
     frame.image_ref = PhotoImage(file=assetPath + '\\image_1.png')
     frame.canvas.create_image(252.0, 450.0, image=frame.image_ref)
 
-    # Create and place image frame using absolute coordinates
     frame.image_frame = tk.Frame(frame, width=440, height=430, bg="#D9D9D9")
-    frame.image_frame.place(x=252.0 - 220, y=450.0 - 215)  # Centered at (252, 450)
+    frame.image_frame.place(x=252.0 - 220, y=450.0 - 215)
 
-    # Create a child frame and use pack (or grid, but not both!)
     frame.frame_child = tk.Frame(frame, bg="#D9D9D9", width=500, height=540)
     frame.frame_child.place(x=550, y=135, width=500, height=540)
 
@@ -349,7 +346,7 @@ def checkTicked(section_dict):
                     if section_var and section_var.get() == 1:
                         ticked_sections[course].append(section_name[:-4])
 
-def shake_frame(frame, root):
+def shakeFrame(frame, root):
     original_x = frame.winfo_x()
     original_y = frame.winfo_y()
     
