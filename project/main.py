@@ -25,7 +25,6 @@ window_main.geometry("1080x740")
 window_main.configure(bg="#FFFFFF")
 frame_2.pack(fill="both", expand=True)
 build_gui.frameFill_PRIMARY(frame_2)
-build_gui.frameSet_GROUPS(frame_2)
 
 def runSelect(*args):
     global df
@@ -37,7 +36,6 @@ def runSelect(*args):
 
     build_gui.showGroups(frame_2.image_frame, sections)
     build_gui.showDataframe(frame_2, df)
-    build_gui.shakeFrame(frame_2.frame_child, window_main)
 
 def runZTest():
     selected_count = sum(var.get() for course in build_gui.section_vars for var in build_gui.section_vars[course])
@@ -60,7 +58,6 @@ def runGPACalc():
     build_gui.checkTicked(sections)
     gpa_df = gpa_calculator.calcGPA(df, build_gui.ticked_sections)
     build_gui.showDataframe(frame_2, gpa_df)
-    build_gui.shakeFrame(frame_2.frame_child, window_main)
 
 def runStudentList():
     build_gui.ticked_courses    = []
@@ -73,7 +70,6 @@ def runStudentList():
     good_df, work_df = student_list.classify_students(df, build_gui.ticked_sections)
     concat = pd.concat([good_df, work_df], ignore_index=True)
     build_gui.showDataframe(frame_2, concat)
-    build_gui.shakeFrame(frame_2.frame_child, window_main)
 
 def runAction(*args):
     if   frame_2.dropdown_var_2.get() == "Z-Test":

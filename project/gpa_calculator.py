@@ -44,6 +44,6 @@ def calcGPA(df, course_dict):
             section_avg = section_df['GPA'].mean()
             result.append([course, section, section_avg])
 
-    result_df = pd.DataFrame(result, columns=['Course', 'Section', 'Average'])
+    result_df = pd.DataFrame(result, columns=['Class', 'Section', 'Average'])
 
     return result_df

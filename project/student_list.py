@@ -16,13 +16,13 @@ def classify_students(df, sections_dict):
         filtered_df = df[df['Section'].isin(sections)]
         
         for _, row in filtered_df[filtered_df['Grade'].isin(good_grades)].iterrows():
-            good_list.append((row['ID'], row['Name'], row['Grade'], course))
+            good_list.append((row['Name'], row['ID'], row['Grade'], course))
         
         for _, row in filtered_df[filtered_df['Grade'].isin(work_grades)].iterrows():
-            work_list.append((row['ID'], row['Name'], row['Grade'], course))
+            work_list.append((row['Name'], row['ID'], row['Grade'], course))
 
-    good_df = pd.DataFrame(good_list, columns=['Name', 'ID',  'Grade', 'Course'])
-    work_df = pd.DataFrame(work_list, columns=['Name', 'ID',  'Grade', 'Course'])
+    good_df = pd.DataFrame(good_list, columns=['Name', 'ID',  'Grade', 'Class'])
+    work_df = pd.DataFrame(work_list, columns=['Name', 'ID',  'Grade', 'Class'])
 
     good_df['Category'] = 'Good'
     work_df['Category'] = 'Work'

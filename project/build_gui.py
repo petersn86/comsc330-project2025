@@ -48,10 +48,9 @@ def closeWindow(window):
         messagebox.showinfo("Stop!", "No RUN Files Detected... Please Select Another Directory")
 
 def showDataframe(frame, df):
-
     for widget in frame.frame_child.winfo_children():
         widget.destroy()
-    
+
     container = tk.Frame(frame.frame_child)
     container.pack(fill="both", expand=True)
 
@@ -71,7 +70,7 @@ def showDataframe(frame, df):
 
     vsb = tk.Scrollbar(container, orient="vertical", command=tree.yview)
     tree.configure(yscrollcommand=vsb.set)
-    
+
     vsb.place(relx=0.97, rely=0, relwidth=0.03, relheight=1.0)
     hsb.place(x=0, rely=1.0, relwidth=1.0, anchor="sw")
 
@@ -170,6 +169,7 @@ def frameFill_PRIMARY(frame):
     yscrollbar = tk.Scrollbar(frame, orient="vertical", command=frame.canvas.yview)
     yscrollbar.place(relx=1.0, rely=0.0, relheight=1.0, anchor='ne')
     frame.canvas.configure(yscrollcommand=yscrollbar.set)
+    frame.canvas.config(scrollregion=(0, 0, 2000, 2000))
 
     frame.canvas.create_rectangle(
         0.0, 0.0, 2000.0, 111.0, fill="#D9D9D9", outline=""
@@ -220,13 +220,13 @@ def frameFill_PRIMARY(frame):
     frame.dropdown_var_2.set("Action")
 
     options = ["Display-GPA", "Z-Test", "Student-List"]
-    dropdown_menu = OptionMenu(
-        frame, 
+    frame.dropdown_menu_2 = OptionMenu(
+        frame.canvas, 
         frame.dropdown_var_2,
         *options
     )
 
-    dropdown_menu.config(
+    frame.dropdown_menu_2.config(
         font=("Arial", 8),
         bg="#F0F0F0",
         fg="#333333",
@@ -238,26 +238,27 @@ def frameFill_PRIMARY(frame):
         width=10
     )
 
-    dropdown_menu.place(x=910.0, y=70.0)
+    frame.canvas.create_window(910.0, 70.0, window=frame.dropdown_menu_2, anchor="nw") # Place using create_window
 
-def frameSet_GROUPS(frame):
     frame.image_ref = PhotoImage(file=assetPath + '\\image_1.png')
     frame.canvas.create_image(252.0, 450.0, image=frame.image_ref)
 
-    frame.image_frame = tk.Frame(frame, width=440, height=430, bg="#D9D9D9")
-    frame.image_frame.place(x=252.0 - 220, y=450.0 - 215)
+    frame.image_frame = tk.Frame(frame.canvas, width=440, height=430, bg="#D9D9D9")
+    frame.canvas.create_window(32.0, 235.0, window=frame.image_frame, anchor="nw")
 
-    frame.frame_child = tk.Frame(frame, bg="#D9D9D9", width=500, height=540)
-    frame.frame_child.place(x=550, y=135, width=500, height=540)
+    frame.frame_child = tk.Frame(frame.canvas, bg="#D9D9D9", width=500, height=540)
+    frame.frame_child.propagate(False)
+    frame.canvas.create_window(550, 135, window=frame.frame_child, anchor="nw")
 
     # BUTTON 4 (handles dataframe download)
     frame.button_image_4 = PhotoImage(file=assetPath + '\\button_4.png')
     frame.button_4 = Button(
-        frame, image=frame.button_image_4, borderwidth=0, highlightthickness=0,
+        frame.canvas, image=frame.button_image_4, borderwidth=0, highlightthickness=0,
         bg="#FFFFFF", command= None, relief="flat"
     )
 
-    frame.button_4.place(x=600 + 500 - frame.button_4.winfo_width(), y=95 + 540 + 10)
+    frame.canvas.create_window(450 + 500 - frame.button_4.winfo_width(), 130 + 540 + 10, window=frame.button_4, anchor="nw")
+
 
 def showGroups(frame, sections):
     frame.config(bg="#D9D9D9")
@@ -345,18 +346,3 @@ def checkTicked(section_dict):
                     section_var = section_vars.get(course, [])[i]
                     if section_var and section_var.get() == 1:
                         ticked_sections[course].append(section_name[:-4])
-
-def shakeFrame(frame, root):
-    original_x = frame.winfo_x()
-    original_y = frame.winfo_y()
-    
-    def shake(x_offset, count, move_distance):
-        if count > 0:
-            frame.place(x=x_offset, y=original_y)
-            next_x_offset = x_offset + move_distance if count % 2 == 0 else x_offset - move_distance
-            next_move_distance = move_distance * 0.8  # Reduce distance by 20% each time
-            root.after(50, shake, next_x_offset, count - 1, next_move_distance)
-        else:
-            frame.place(x=original_x, y=original_y)
-    
-    shake(original_x, 10, 10)
