@@ -346,3 +346,30 @@ def checkTicked(section_dict):
                     section_var = section_vars.get(course, [])[i]
                     if section_var and section_var.get() == 1:
                         ticked_sections[course].append(section_name[:-4])
+
+
+def shakeFrame(frame, intensity=5, duration=300):
+
+    canvas = frame.canvas
+    widget = frame.frame_child
+    original_x = 550
+    original_y = 135
+
+    if not hasattr(frame, "window_id"):
+        frame.window_id = canvas.create_window(original_x, original_y, window=widget, anchor="nw")
+
+    window_id = frame.window_id
+
+    shake_interval = 50
+    shakes = duration // shake_interval
+    directions = [intensity, -intensity] * (shakes // 2)
+
+    def shake(index=0):
+        if index < len(directions):
+            dx = directions[index]
+            canvas.coords(window_id, original_x + dx, original_y)
+            canvas.after(shake_interval, shake, index + 1)
+        else:
+            canvas.coords(window_id, original_x, original_y)  # Just reset position
+
+    shake()

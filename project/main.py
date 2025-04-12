@@ -2,6 +2,7 @@ import parser
 import build_gui
 import gpa_calculator
 import student_list
+import significance_test
 import pandas   as    pd
 from build_gui import Tk, messagebox, defaultdict
 
@@ -36,17 +37,7 @@ def runSelect(*args):
 
     build_gui.showGroups(frame_2.image_frame, sections)
     build_gui.showDataframe(frame_2, df)
-
-def runZTest():
-    selected_count = sum(var.get() for course in build_gui.section_vars for var in build_gui.section_vars[course])
-    if selected_count != 1:
-        if selected_count == 0:
-            messagebox.showinfo("Stop!", "Please Select One of the Sections for this Action")
-            return
-        else:
-            messagebox.showinfo("Stop!", "You Can Only Select One Section for this Action")
-            return
-    messagebox.showinfo("Continue")
+    build_gui.shakeFrame(frame_2)
 
 def runGPACalc():
     build_gui.ticked_courses    = []
@@ -58,6 +49,8 @@ def runGPACalc():
     build_gui.checkTicked(sections)
     gpa_df = gpa_calculator.calcGPA(df, build_gui.ticked_sections)
     build_gui.showDataframe(frame_2, gpa_df)
+    build_gui.shakeFrame(frame_2)
+    print(gpa_df)
 
 def runStudentList():
     build_gui.ticked_courses    = []
@@ -70,6 +63,21 @@ def runStudentList():
     good_df, work_df = student_list.classify_students(df, build_gui.ticked_sections)
     concat = pd.concat([good_df, work_df], ignore_index=True)
     build_gui.showDataframe(frame_2, concat)
+    build_gui.shakeFrame(frame_2)
+
+def runZTest():
+    build_gui.ticked_courses    = []
+    build_gui.ticked_sections   = {}
+    selected_count = sum(var.get() for course in build_gui.section_vars for var in build_gui.section_vars[course])
+    if selected_count == 0:
+        messagebox.showinfo("Stop!", "Please Select One of the Sections for this Action")
+        return
+    build_gui.checkTicked(sections)
+    gpa_df = gpa_calculator.calcGPA(df, build_gui.ticked_sections)
+    z_df   = significance_test.calculateZScores(df, build_gui.ticked_sections, gpa_df)
+    build_gui.showDataframe(frame_2, z_df)
+    build_gui.shakeFrame(frame_2)
+    print(z_df)
 
 def runAction(*args):
     if   frame_2.dropdown_var_2.get() == "Z-Test":
@@ -85,6 +93,3 @@ frame_2.dropdown_var_2.trace("w", runAction)
 
 if build_gui.state["state"] == True: 
     window_main.mainloop()
-
-build_gui.checkTicked(sections)
-print(build_gui.ticked_sections)

@@ -86,3 +86,30 @@ def is_significant_difference(df, section1, section2, significance=0.05):
     else: 
         print("Value is not significant.")
         return False
+    
+def calculateZScores(df, course_dict, gpa_df):
+    result = []
+
+    for course, sections in course_dict.items():
+        course_df = gpa_df[gpa_df['Class'] == course]
+        
+        course_avg = course_df['Average'].mean()
+        course_std = course_df['Average'].std()
+
+        result.append([course, 'Course Average', course_avg, None])
+
+        for section in sections:
+            section_df = course_df[course_df['Section'] == section]
+            
+            section_avg = section_df['Average'].values[0]
+            
+            if course_std > 0:
+                section_zscore = (section_avg - course_avg) / course_std
+            else:
+                section_zscore = None
+
+            result.append([course, section, section_avg, section_zscore])
+
+    result_df = pd.DataFrame(result, columns=['Class', 'Section', 'GPA', 'Z-Score'])
+    
+    return result_df
