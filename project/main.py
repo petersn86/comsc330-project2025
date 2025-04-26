@@ -17,6 +17,7 @@ window_start.resizable(False, False)
 frame_1.pack(fill="both", expand=True)
 build_gui.frameFill_START(frame_1)
 
+window_start.title("Welcome!")
 window_start.mainloop()
 
 window_main             = Tk()
@@ -37,6 +38,7 @@ def runSelect(*args):
 
     build_gui.showGroups(frame_2.image_frame, sections)
     build_gui.showDataframe(frame_2, df)
+    build_gui.clearFrame(frame_2.graph_frame)
     build_gui.shakeFrame(frame_2)
 
 def runGPACalc():
@@ -48,9 +50,10 @@ def runGPACalc():
         return
     build_gui.checkTicked(sections)
     gpa_df = gpa_calculator.calcGPA(df, build_gui.ticked_sections)
+    fig    = gpa_calculator.createGPAGraph(gpa_df)
     build_gui.showDataframe(frame_2, gpa_df)
+    build_gui.showGraph(frame_2.graph_frame, fig)
     build_gui.shakeFrame(frame_2)
-    print(gpa_df)
 
 def runStudentList():
     build_gui.ticked_courses    = []
@@ -62,8 +65,11 @@ def runStudentList():
     build_gui.checkTicked(sections)
     good_df, work_df = student_list.classify_students(df, build_gui.ticked_sections)
     concat = pd.concat([good_df, work_df], ignore_index=True)
-    build_gui.showDataframe(frame_2, concat)
+    final  = student_list.merge_duplicate_students(concat)
+    fig    = student_list.plotStudentCharts(final)
+    build_gui.showDataframe(frame_2, final)
     build_gui.shakeFrame(frame_2)
+    build_gui.showGraph(frame_2.graph_frame, fig)
 
 def runZTest():
     build_gui.ticked_courses    = []
@@ -75,9 +81,11 @@ def runZTest():
     build_gui.checkTicked(sections)
     gpa_df = gpa_calculator.calcGPA(df, build_gui.ticked_sections)
     z_df   = significance_test.calculateZScores(df, build_gui.ticked_sections, gpa_df)
+    fig    = significance_test.createZScoreGraph(z_df)
     build_gui.showDataframe(frame_2, z_df)
+    build_gui.showGraph(frame_2.graph_frame, fig)
     build_gui.shakeFrame(frame_2)
-    print(z_df)
+    
 
 def runAction(*args):
     if   frame_2.dropdown_var_2.get() == "Z-Test":
@@ -92,4 +100,5 @@ frame_2.dropdown_var.trace("w", runSelect)
 frame_2.dropdown_var_2.trace("w", runAction)
 
 if build_gui.state["state"] == True: 
+    window_main.title("GPA Analyzer")
     window_main.mainloop()

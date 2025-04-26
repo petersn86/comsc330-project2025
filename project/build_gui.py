@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import filedialog, Frame, Tk, Canvas, Button, PhotoImage, StringVar, OptionMenu, ttk, messagebox
 import os
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from collections import defaultdict
 
 assetPath       = 'project\\assets'
@@ -166,13 +167,18 @@ def frameFill_PRIMARY(frame):
     frame.canvas.place(x=0, y=0)
 
     # Add scrollbars
-    yscrollbar = tk.Scrollbar(frame, orient="vertical", command=frame.canvas.yview)
-    yscrollbar.place(relx=1.0, rely=0.0, relheight=1.0, anchor='ne')
-    frame.canvas.configure(yscrollcommand=yscrollbar.set)
-    frame.canvas.config(scrollregion=(0, 0, 2000, 2000))
+    vsb = tk.Scrollbar(frame, orient="vertical", command=frame.canvas.yview)
+    vsb.place(relx=1.0, rely=0.0, relheight=1.0, anchor='ne')
+    frame.canvas.configure(yscrollcommand=vsb.set)
+    
+    hsb = tk.Scrollbar(frame, orient="horizontal", command=frame.canvas.xview)
+    hsb.place(relx=0.0, rely=1.0, relwidth=1.0, anchor='sw')
+    frame.canvas.configure(xscrollcommand=hsb.set)
+
+    frame.canvas.config(scrollregion=(0, 0, 4000, 4000)) 
 
     frame.canvas.create_rectangle(
-        0.0, 0.0, 2000.0, 111.0, fill="#D9D9D9", outline=""
+        0.0, 0.0, 20000.0, 111.0, fill="#D9D9D9", outline=""
     )
 
     # Fill canvas with text
@@ -240,15 +246,18 @@ def frameFill_PRIMARY(frame):
 
     frame.canvas.create_window(910.0, 70.0, window=frame.dropdown_menu_2, anchor="nw") # Place using create_window
 
-    frame.image_ref = PhotoImage(file=assetPath + '\\image_1.png')
+    frame.image_ref     = PhotoImage(file=assetPath + '\\image_1.png')
     frame.canvas.create_image(252.0, 450.0, image=frame.image_ref)
 
-    frame.image_frame = tk.Frame(frame.canvas, width=440, height=430, bg="#D9D9D9")
+    frame.image_frame   = tk.Frame(frame.canvas, width=440, height=430, bg="#D9D9D9")
     frame.canvas.create_window(32.0, 235.0, window=frame.image_frame, anchor="nw")
 
-    frame.frame_child = tk.Frame(frame.canvas, bg="#D9D9D9", width=500, height=540)
+    frame.frame_child   = tk.Frame(frame.canvas, bg="#D9D9D9", width=500, height=540)
     frame.frame_child.propagate(False)
-    frame.canvas.create_window(550, 135, window=frame.frame_child, anchor="nw")
+    frame.canvas.create_window(550.0, 135.0, window=frame.frame_child, anchor="nw")
+
+    frame.graph_frame   = tk.Frame(frame.canvas, bg="#D9D9D9", width= 1020, height= 600)
+    frame.canvas.create_window(30.0, 750.0, window=frame.graph_frame, anchor="nw")
 
     # BUTTON 4 (handles dataframe download)
     frame.button_image_4 = PhotoImage(file=assetPath + '\\button_4.png')
@@ -373,3 +382,18 @@ def shakeFrame(frame, intensity=5, duration=300):
             canvas.coords(window_id, original_x, original_y)  # Just reset position
 
     shake()
+
+def showGraph(frame, fig):
+    # Clear old widgets
+    for widget in frame.winfo_children():
+        widget.destroy()
+
+    fig_canvas = FigureCanvasTkAgg(fig, master=frame)
+    fig_widget = fig_canvas.get_tk_widget()
+    fig_widget.pack(fill="both", expand=True)
+    fig_canvas.draw()
+
+def clearFrame(frame):
+    # Clear old widgets
+    for widget in frame.winfo_children():
+        widget.destroy()

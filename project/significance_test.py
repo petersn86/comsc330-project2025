@@ -13,7 +13,9 @@ Functions in this program:
 import numpy as np
 from scipy import stats
 import pandas as pd
-
+import matplotlib.pyplot as plt
+import itertools
+import textwrap
 
 def grade_to_gpa(grade):    #Converts a letter to GPA 
     conversion = {
@@ -113,3 +115,59 @@ def calculateZScores(df, course_dict, gpa_df):
     result_df = pd.DataFrame(result, columns=['Class', 'Section', 'GPA', 'Z-Score'])
     
     return result_df
+
+def createZScoreGraph(df):
+    # Drop rows where Z-Score is NaN (e.g., Course Averages)
+    df = df.dropna(subset=["Z-Score"])
+
+    # Prepare labels and data
+    x_labels = []
+    z_scores = []
+    colors = []
+
+    color_cycle = itertools.cycle(plt.cm.tab10.colors)
+    class_colors = {}
+
+    for _, row in df.iterrows():
+        course = row["Class"]
+        section = row["Section"]
+        z = row["Z-Score"]
+
+        # Wrap label text for readability
+        label = '\n'.join(textwrap.wrap(f"{course}\n{section}", 12))
+        x_labels.append(label)
+        z_scores.append(z)
+
+        # Assign consistent color per course
+        if course not in class_colors:
+            class_colors[course] = next(color_cycle)
+        colors.append(class_colors[course])
+
+    # Dynamically adjust width
+    fig_width = max(12, len(x_labels) * 0.6)
+    fig, ax = plt.subplots(figsize=(fig_width, 6))
+
+    # Bar chart
+    bars = ax.bar(x_labels, z_scores, color=colors, alpha=0.85)
+
+    # Add horizontal line at Z = 0
+    ax.axhline(0, color='black', linestyle='--', linewidth=1)
+
+    # Format plot
+    ax.set_title('Z-Scores by Course Section')
+    ax.set_ylabel('Z-Score')
+    ax.set_xlabel('Course and Section')
+    ax.tick_params(axis='x', rotation=75)
+    ax.grid(axis='y', linestyle='--', alpha=0.5)
+
+    # Legend
+    legend_patches = [
+        plt.Line2D([0], [0], marker='s', color='w',
+                   label=cls, markerfacecolor=col, markersize=10)
+        for cls, col in class_colors.items()
+    ]
+    ax.legend(handles=legend_patches, title="Class")
+
+    fig.tight_layout()
+    plt.close(fig)
+    return fig
