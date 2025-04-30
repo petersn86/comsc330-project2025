@@ -1,8 +1,18 @@
+#----------------------------build_gui.py---------------------------
+#
+# Formulates Tkinter frames and windows
+# Front end for software
+# @Author: Peter Nolan
+#
+#--------------------------------------------------------------------
 import tkinter as tk
 from tkinter import filedialog, Frame, Tk, Canvas, Button, PhotoImage, StringVar, OptionMenu, ttk, messagebox
 import os
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from collections import defaultdict
 
+
+# Variables:
 assetPath       = 'project\\assets'
 runList         = []
 state           = {"state": False}
@@ -13,49 +23,73 @@ section_vars    = defaultdict(list)     # Store section checkboxes' states
 ticked_courses  = []
 ticked_sections = {}
 
+# Save Data Frame
+def downloadDataFrame(df):
+    global folderPath
+    filename = "dataframe.csv"
 
+    # Join directory path with filename
+    full_filename            = os.path.join(folderPath, filename)
+
+    # Check if the file already exists
+    base_filename, extension = os.path.splitext(full_filename)
+    counter                  = 1
+    new_filename             = full_filename
+
+    while os.path.exists(new_filename):
+        new_filename         = f"{base_filename}({counter}){extension}"
+        counter              += 1
+
+    # Save the dataframe as a CSV
+    df.to_csv(new_filename, index=False)
+    messagebox.showinfo("Save Successful", f"DataFrame has been saved as {new_filename}")
+
+# Open folder to select working directory
 def openFolder(frame):
     global folderPath
-    folderPath = filedialog.askdirectory()
+    folderPath               = filedialog.askdirectory()
     if folderPath:
         frame.canvas.itemconfig(frame.selected_path, text=f"Selected Path: {folderPath}")   # config text
         frame.button_2.place(x=329.0, y=486.0, width=122.0, height=44.0)                    # for button_2
 
+# Close Starting Window
 def closeWindow(window):
     if any(file.endswith('.RUN') for file in os.listdir(folderPath)):
         window.destroy()
-        state["state"] = True
+        state["state"]       = True
     else:
         messagebox.showinfo("Stop!", "No RUN Files Detected... Please Select Another Directory")
 
+# Show Data Frame in frame (using tree view)
 def showDataframe(frame, df):
 
-    for widget in frame.winfo_children():
-        widget.destroy()
-    
-    container = tk.Frame(frame)
+    clearFrame(frame.frame_child)
+    container                = tk.Frame(frame.frame_child)
     container.pack(fill="both", expand=True)
 
     tree = ttk.Treeview(container, columns=list(df.columns), show="headings")
 
     for col in df.columns:
         tree.heading(col, text=col)
-        tree.column(col, width=100, anchor="center", stretch=tk.NO)
+        tree.column(col, width=100, anchor="center", stretch=tk.YES)
 
     for index, row in df.iterrows():
         tree.insert("", "end", values=list(row))
 
     tree.pack(fill="both", expand=True, side="left")
 
-    hsb = tk.Scrollbar(frame, orient="horizontal", command=tree.xview)
+    hsb = tk.Scrollbar(frame.frame_child, orient="horizontal", command=tree.xview)
     tree.configure(xscrollcommand=hsb.set)
 
     vsb = tk.Scrollbar(container, orient="vertical", command=tree.yview)
     tree.configure(yscrollcommand=vsb.set)
-    
+
     vsb.place(relx=0.97, rely=0, relwidth=0.03, relheight=1.0)
     hsb.place(x=0, rely=1.0, relwidth=1.0, anchor="sw")
 
+    frame.button_4.config(command=lambda: downloadDataFrame(df))
+
+# Search for RUN files
 def searchPath(dir, runList):
     try:
         files = os.listdir(dir)
@@ -68,10 +102,17 @@ def searchPath(dir, runList):
         print(f"Error: Permission denied to access the directory '{dir}'.")
     return runList
 
+# Build a frame in a window
 def buildFrame(window):
     frame = Frame(window, bg="#FFFFFF")
     return frame
 
+# Clear all widgets in a frame
+def clearFrame(frame):
+    for widget in frame.winfo_children():
+        widget.destroy()
+
+# Handles Starting Frame Fill
 def frameFill_START(frame):
     global runList
     # Fill frame with canvas
@@ -134,18 +175,31 @@ def frameFill_START(frame):
         bg="#FFFFFF", command= lambda: (searchPath(folderPath, runList), closeWindow(frame.winfo_toplevel())), relief="flat"
     )
 
+# Handles Primary Frame Fill
 def frameFill_PRIMARY(frame):
     global runList
-    
+
     # Fill frame with canvas
     frame.canvas = Canvas(
         frame, bg="#FFFFFF", height=1080, width=1920, bd=0,
-        highlightthickness=0, relief="ridge"
+        highlightthickness=0, relief="ridge", scrollregion=(0, 0, 2000, 1080) # Make canvas scrollable
     )
 
     frame.canvas.place(x=0, y=0)
+
+    # Add scrollbars
+    vsb = tk.Scrollbar(frame, orient="vertical", command=frame.canvas.yview)
+    vsb.place(relx=1.0, rely=0.0, relheight=1.0, anchor='ne')
+    frame.canvas.configure(yscrollcommand=vsb.set)
+    
+    hsb = tk.Scrollbar(frame, orient="horizontal", command=frame.canvas.xview)
+    hsb.place(relx=0.0, rely=1.0, relwidth=1.0, anchor='sw')
+    frame.canvas.configure(xscrollcommand=hsb.set)
+
+    frame.canvas.config(scrollregion=(0, 0, 4000, 4000)) 
+
     frame.canvas.create_rectangle(
-        0.0, 0.0, 2000.0, 111.0, fill="#D9D9D9", outline=""
+        0.0, 0.0, 20000.0, 111.0, fill="#D9D9D9", outline=""
     )
 
     # Fill canvas with text
@@ -170,7 +224,7 @@ def frameFill_PRIMARY(frame):
 
     if runList:
         frame.dropdown_menu = OptionMenu(
-            frame,
+            frame.canvas,  # Place on the canvas
             frame.dropdown_var,
             *runList
         )
@@ -186,20 +240,20 @@ def frameFill_PRIMARY(frame):
             bd=2,
             width=10
         )
-        
-        frame.dropdown_menu.place(x=30.0, y=180.0)
 
-    dropdown_var_2 = StringVar()
-    dropdown_var_2.set("Action")
+        frame.canvas.create_window(30.0, 180.0, window=frame.dropdown_menu, anchor="nw") # Place using create_window
 
-    options = ["Option 1", "Option 2", "Option 3", "Option 4"]
-    dropdown_menu = OptionMenu(
-        frame, 
-        dropdown_var_2,
+    frame.dropdown_var_2 = StringVar()
+    frame.dropdown_var_2.set("Action")
+
+    options = ["Display-GPA", "Z-Test", "Student-List"]
+    frame.dropdown_menu_2 = OptionMenu(
+        frame.canvas, 
+        frame.dropdown_var_2,
         *options
     )
 
-    dropdown_menu.config(
+    frame.dropdown_menu_2.config(
         font=("Arial", 8),
         bg="#F0F0F0",
         fg="#333333",
@@ -211,26 +265,35 @@ def frameFill_PRIMARY(frame):
         width=10
     )
 
-    dropdown_menu.place(x=910.0, y=70.0)
+    frame.canvas.create_window(910.0, 70.0, window=frame.dropdown_menu_2, anchor="nw") # Place using create_window
 
-def frameSet_GROUPS(frame):
-    # Load and display image
-    frame.image_ref = PhotoImage(file=assetPath + '\\image_1.png')
+    frame.image_ref     = PhotoImage(file=assetPath + '\\image_1.png')
     frame.canvas.create_image(252.0, 450.0, image=frame.image_ref)
 
-    # Create and place image frame using absolute coordinates
-    frame.image_frame = tk.Frame(frame, width=440, height=430, bg="#D9D9D9")
-    frame.image_frame.place(x=252.0 - 220, y=450.0 - 215)  # Centered at (252, 450)
+    frame.image_frame   = tk.Frame(frame.canvas, width=440, height=430, bg="#D9D9D9")
+    frame.canvas.create_window(32.0, 235.0, window=frame.image_frame, anchor="nw")
 
-    # Create a child frame and use pack (or grid, but not both!)
-    frame.frame_child = tk.Frame(frame, bg="#D9D9D9", width=500, height=540)
-    frame.frame_child.place(x=550, y=135, width=500, height=540)
+    frame.frame_child   = tk.Frame(frame.canvas, bg="#D9D9D9", width=500, height=540)
+    frame.frame_child.propagate(False)
+    frame.canvas.create_window(550.0, 135.0, window=frame.frame_child, anchor="nw")
 
+    frame.graph_frame   = tk.Frame(frame.canvas, bg="#D9D9D9", width= 1020, height= 600)
+    frame.canvas.create_window(30.0, 750.0, window=frame.graph_frame, anchor="nw")
+
+    # BUTTON 4 (handles dataframe download)
+    frame.button_image_4 = PhotoImage(file=assetPath + '\\button_4.png')
+    frame.button_4 = Button(
+        frame.canvas, image=frame.button_image_4, borderwidth=0, highlightthickness=0,
+        bg="#FFFFFF", command= None, relief="flat"
+    )
+
+    frame.canvas.create_window(450 + 500 - frame.button_4.winfo_width(), 130 + 540 + 10, window=frame.button_4, anchor="nw")
+
+# Show Groups in frame from RUN file
 def showGroups(frame, sections):
     frame.config(bg="#D9D9D9")
 
-    for widget in frame.winfo_children():
-        widget.destroy()
+    clearFrame(frame)
 
     style = ttk.Style()
     style.configure("TCheckbutton", font=("Arial", 13), background="#D9D9D9")
@@ -266,32 +329,84 @@ def showGroups(frame, sections):
 
     for course, section_list in sections.items():
         course_vars[course] = tk.IntVar()
+        section_vars[course] = []  # Make sure it's initialized
+
         course_chk = ttk.Checkbutton(
-            container, text=course, variable=course_vars[course], command=lambda c=course: toggle_sections(c)
+            container, text=course, variable=course_vars[course],
+            command=lambda c=course: toggle_sections(c)
         )
         course_chk.pack(anchor="w", pady=2)
 
         # Section-level checkboxes
         for section in section_list:
+            # Remove the ".sec" suffix from the section name
+            section_name = section.removesuffix(".sec")
+
             section_var = tk.IntVar()
             section_vars[course].append(section_var)
 
-            # When a section checkbox is clicked, update the course checkbox
+            def make_callback(c=course, v=section_var):
+                def callback():
+                    update_course_checkbox(c)
+                return callback
+
             section_chk = ttk.Checkbutton(
-                container, text=section, variable=section_var, command=lambda c=course: update_course_checkbox(c)
+                container, text=section_name, variable=section_var,
+                command=make_callback()
             )
             section_chk.pack(anchor="w", padx=20)
 
     # Link the scrollbar to the canvas
     canvas.configure(yscrollcommand=scrollbar.set)
 
-def checkTicked(df):
-    for course, var in course_vars.items():
-        if var.get() == 1:  # If course is ticked
-            ticked_courses.append(course)
-            ticked_sections[course] = []  # Initialize empty list for sections
+def unselectAll():
+    for course in course_vars:
+        course_vars[course].set(0)
+        for var in section_vars[course]:
+            var.set(0)
 
-            for i, section_var in enumerate(section_vars.get(course, [])):
-                if section_var.get() == 1:
-                    section_value = df.loc[df['Class'] == course, 'Section'].iloc[i]
-                    ticked_sections[course].append(section_value)
+def checkTicked(section_dict):
+    for course, var in course_vars.items():
+        if var.get() == 1:  # If the course is ticked
+            ticked_courses.append(course)
+            ticked_sections[course] = [] 
+            if course in section_dict:
+                for i, section_name in enumerate(section_dict[course]):
+                    section_var = section_vars.get(course, [])[i]
+                    if section_var and section_var.get() == 1:
+                        ticked_sections[course].append(section_name[:-4])
+
+
+# Shake animation for Data Frame
+def shakeFrame(frame, intensity=5, duration=300):
+    canvas = frame.canvas
+    widget = frame.frame_child
+    original_x = 550
+    original_y = 135
+
+    if not hasattr(frame, "window_id"):
+        frame.window_id = canvas.create_window(original_x, original_y, window=widget, anchor="nw")
+
+    window_id = frame.window_id
+
+    shake_interval = 50
+    shakes = duration // shake_interval
+    directions = [intensity, -intensity] * (shakes // 2)
+
+    def shake(index=0):
+        if index < len(directions):
+            dx = directions[index]
+            canvas.coords(window_id, original_x + dx, original_y)
+            canvas.after(shake_interval, shake, index + 1)
+        else:
+            canvas.coords(window_id, original_x, original_y)  # Just reset position
+
+    shake()
+
+# Show Graph in a frame
+def showGraph(frame, fig):
+    clearFrame(frame)
+    fig_canvas = FigureCanvasTkAgg(fig, master=frame)
+    fig_widget = fig_canvas.get_tk_widget()
+    fig_widget.pack(fill="both", expand=True)
+    fig_canvas.draw()
