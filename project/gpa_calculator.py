@@ -1,14 +1,16 @@
+#-------------------------gpa_calculator.py--------------------------
 #
 # Calculates the GPA for individual sections.
 # Groups sections and calculates group GPAs.
 # @Author: Mike Giles
 #
-
+#--------------------------------------------------------------------
 import pandas as pd
 import matplotlib.pyplot as plt
 import itertools
 import textwrap
 
+# Converts letter grade to raw GPA
 def grade_to_gpa(grade):
     conversion = {
         'A': 4.00,
@@ -30,6 +32,7 @@ def grade_to_gpa(grade):
 
     return conversion.get(grade.strip(), None)
 
+# Calculate GPA averages from raw dataframe
 def calcGPA(df, course_dict):
     temp = df.copy()
     
@@ -52,6 +55,7 @@ def calcGPA(df, course_dict):
 
     return result_df
 
+# Creates graph for GPA dataframe
 def createGPAGraph(df):
     # Prepare data containers
     x_labels = []

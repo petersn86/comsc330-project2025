@@ -1,15 +1,17 @@
+#---------------------------student_list.py--------------------------
 #
 # Identifies students who qualify for the Good or Work list.
 # Tracks historical data to determine past appearances.
 # @Author: Emma Bolduc
 #
-
+#--------------------------------------------------------------------
 import pandas as pd
 import matplotlib.pyplot as plt
 import itertools
 import textwrap
 import math
 
+# Create Good and Work lists from raw data frame
 def classify_students(df, sections_dict):
     good_grades = {'A', 'A-'}
     work_grades = {'D+', 'D', 'D-', 'F'}
@@ -34,6 +36,7 @@ def classify_students(df, sections_dict):
 
     return good_df, work_df
 
+# Find duplicate students
 def merge_duplicate_students(df):
     grouped = df.groupby('ID')
 
@@ -70,8 +73,8 @@ def merge_duplicate_students(df):
     work_df = pd.DataFrame(work_list)
     return pd.concat([good_df, work_df], ignore_index=True)
 
+# Creates graph for Students List dataframe
 def plotStudentCharts(df):
-
     df = df.assign(Class=df['Class'].str.split(', ')).explode('Class')
 
     grouped = df.groupby(['Class', 'Category']).size().unstack(fill_value=0)

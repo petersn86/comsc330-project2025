@@ -1,3 +1,10 @@
+#------------------------------main.py-------------------------------
+#
+# Driver file for software
+# Connects modules into a single program
+# @Author(s): Peter Nolan, Eric Tech, Emma Bolduc, Mike Giles
+#
+#--------------------------------------------------------------------
 import parser
 import build_gui
 import gpa_calculator
@@ -6,6 +13,7 @@ import significance_test
 import pandas   as    pd
 from build_gui import Tk, messagebox, defaultdict
 
+# Build Starting Window
 window_start            = Tk()
 frame_1                 = build_gui.buildFrame(window_start)
 build_gui.folderPath    = ''
@@ -20,6 +28,7 @@ build_gui.frameFill_START(frame_1)
 window_start.title("Welcome!")
 window_start.mainloop()
 
+#Build Main Window (after RUN selection)
 window_main             = Tk()
 frame_2                 = build_gui.buildFrame(window_main)
 
@@ -28,6 +37,7 @@ window_main.configure(bg="#FFFFFF")
 frame_2.pack(fill="both", expand=True)
 build_gui.frameFill_PRIMARY(frame_2)
 
+# Setup RUN Select functionality
 def runSelect(*args):
     global df
     global sections
@@ -41,6 +51,7 @@ def runSelect(*args):
     build_gui.clearFrame(frame_2.graph_frame)
     build_gui.shakeFrame(frame_2)
 
+# Setup GPA Calculator functionality
 def runGPACalc():
     build_gui.ticked_courses    = []
     build_gui.ticked_sections   = {}
@@ -55,6 +66,7 @@ def runGPACalc():
     build_gui.showGraph(frame_2.graph_frame, fig)
     build_gui.shakeFrame(frame_2)
 
+# Setup Student List functionality
 def runStudentList():
     build_gui.ticked_courses    = []
     build_gui.ticked_sections   = {}
@@ -71,6 +83,7 @@ def runStudentList():
     build_gui.shakeFrame(frame_2)
     build_gui.showGraph(frame_2.graph_frame, fig)
 
+# Setup Z-Test functionality
 def runZTest():
     build_gui.ticked_courses    = []
     build_gui.ticked_sections   = {}
@@ -86,7 +99,7 @@ def runZTest():
     build_gui.showGraph(frame_2.graph_frame, fig)
     build_gui.shakeFrame(frame_2)
     
-
+# Set functionalities into single function
 def runAction(*args):
     if   frame_2.dropdown_var_2.get() == "Z-Test":
         runZTest()
@@ -95,10 +108,13 @@ def runAction(*args):
     elif frame_2.dropdown_var_2.get() == "Student-List":
         runStudentList()
 
+# Set RUN functionality into RUN Dropdown
 frame_2.dropdown_var.trace("w", runSelect)
 
+# Set ACTION functionality into ACTIONS dropdown
 frame_2.dropdown_var_2.trace("w", runAction)
 
+# Condition to move to main window
 if build_gui.state["state"] == True: 
     window_main.title("GPA Analyzer")
     window_main.mainloop()

@@ -1,9 +1,18 @@
+#----------------------------build_gui.py---------------------------
+#
+# Formulates Tkinter frames and windows
+# Front end for software
+# @Author: Peter Nolan
+#
+#--------------------------------------------------------------------
 import tkinter as tk
 from tkinter import filedialog, Frame, Tk, Canvas, Button, PhotoImage, StringVar, OptionMenu, ttk, messagebox
 import os
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from collections import defaultdict
 
+
+# Variables:
 assetPath       = 'project\\assets'
 runList         = []
 state           = {"state": False}
@@ -14,45 +23,48 @@ section_vars    = defaultdict(list)     # Store section checkboxes' states
 ticked_courses  = []
 ticked_sections = {}
 
+# Save Data Frame
 def downloadDataFrame(df):
     global folderPath
     filename = "dataframe.csv"
 
     # Join directory path with filename
-    full_filename = os.path.join(folderPath, filename)
+    full_filename            = os.path.join(folderPath, filename)
 
     # Check if the file already exists
     base_filename, extension = os.path.splitext(full_filename)
-    counter = 1
-    new_filename = full_filename
+    counter                  = 1
+    new_filename             = full_filename
 
     while os.path.exists(new_filename):
-        new_filename = f"{base_filename}({counter}){extension}"
-        counter += 1
+        new_filename         = f"{base_filename}({counter}){extension}"
+        counter              += 1
 
-    # Save the dataframe as a CSV with the new filename
+    # Save the dataframe as a CSV
     df.to_csv(new_filename, index=False)
     messagebox.showinfo("Save Successful", f"DataFrame has been saved as {new_filename}")
 
+# Open folder to select working directory
 def openFolder(frame):
     global folderPath
-    folderPath = filedialog.askdirectory()
+    folderPath               = filedialog.askdirectory()
     if folderPath:
         frame.canvas.itemconfig(frame.selected_path, text=f"Selected Path: {folderPath}")   # config text
         frame.button_2.place(x=329.0, y=486.0, width=122.0, height=44.0)                    # for button_2
 
+# Close Starting Window
 def closeWindow(window):
     if any(file.endswith('.RUN') for file in os.listdir(folderPath)):
         window.destroy()
-        state["state"] = True
+        state["state"]       = True
     else:
         messagebox.showinfo("Stop!", "No RUN Files Detected... Please Select Another Directory")
 
+# Show Data Frame in frame (using tree view)
 def showDataframe(frame, df):
-    for widget in frame.frame_child.winfo_children():
-        widget.destroy()
 
-    container = tk.Frame(frame.frame_child)
+    clearFrame(frame.frame_child)
+    container                = tk.Frame(frame.frame_child)
     container.pack(fill="both", expand=True)
 
     tree = ttk.Treeview(container, columns=list(df.columns), show="headings")
@@ -77,6 +89,7 @@ def showDataframe(frame, df):
 
     frame.button_4.config(command=lambda: downloadDataFrame(df))
 
+# Search for RUN files
 def searchPath(dir, runList):
     try:
         files = os.listdir(dir)
@@ -89,10 +102,17 @@ def searchPath(dir, runList):
         print(f"Error: Permission denied to access the directory '{dir}'.")
     return runList
 
+# Build a frame in a window
 def buildFrame(window):
     frame = Frame(window, bg="#FFFFFF")
     return frame
 
+# Clear all widgets in a frame
+def clearFrame(frame):
+    for widget in frame.winfo_children():
+        widget.destroy()
+
+# Handles Starting Frame Fill
 def frameFill_START(frame):
     global runList
     # Fill frame with canvas
@@ -155,6 +175,7 @@ def frameFill_START(frame):
         bg="#FFFFFF", command= lambda: (searchPath(folderPath, runList), closeWindow(frame.winfo_toplevel())), relief="flat"
     )
 
+# Handles Primary Frame Fill
 def frameFill_PRIMARY(frame):
     global runList
 
@@ -268,12 +289,11 @@ def frameFill_PRIMARY(frame):
 
     frame.canvas.create_window(450 + 500 - frame.button_4.winfo_width(), 130 + 540 + 10, window=frame.button_4, anchor="nw")
 
-
+# Show Groups in frame from RUN file
 def showGroups(frame, sections):
     frame.config(bg="#D9D9D9")
 
-    for widget in frame.winfo_children():
-        widget.destroy()
+    clearFrame(frame)
 
     style = ttk.Style()
     style.configure("TCheckbutton", font=("Arial", 13), background="#D9D9D9")
@@ -349,16 +369,16 @@ def checkTicked(section_dict):
     for course, var in course_vars.items():
         if var.get() == 1:  # If the course is ticked
             ticked_courses.append(course)
-            ticked_sections[course] = []  # Initialize empty list for sections of the course
-            if course in section_dict:  # Check if the course with '.sec' is in section_dict
+            ticked_sections[course] = [] 
+            if course in section_dict:
                 for i, section_name in enumerate(section_dict[course]):
                     section_var = section_vars.get(course, [])[i]
                     if section_var and section_var.get() == 1:
                         ticked_sections[course].append(section_name[:-4])
 
 
+# Shake animation for Data Frame
 def shakeFrame(frame, intensity=5, duration=300):
-
     canvas = frame.canvas
     widget = frame.frame_child
     original_x = 550
@@ -383,17 +403,10 @@ def shakeFrame(frame, intensity=5, duration=300):
 
     shake()
 
+# Show Graph in a frame
 def showGraph(frame, fig):
-    # Clear old widgets
-    for widget in frame.winfo_children():
-        widget.destroy()
-
+    clearFrame(frame)
     fig_canvas = FigureCanvasTkAgg(fig, master=frame)
     fig_widget = fig_canvas.get_tk_widget()
     fig_widget.pack(fill="both", expand=True)
     fig_canvas.draw()
-
-def clearFrame(frame):
-    # Clear old widgets
-    for widget in frame.winfo_children():
-        widget.destroy()

@@ -1,9 +1,10 @@
+#-----------------------------parser.py-----------------------------
 #
 # Loads student grade data
 # Cleans and structures the data for further analysis.
 # @Author: Peter Nolan
 #
-
+#--------------------------------------------------------------------
 import pandas as pd
 import csv
 from collections import defaultdict
