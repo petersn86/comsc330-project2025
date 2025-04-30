@@ -13,15 +13,15 @@ from collections import defaultdict
 
 
 # Variables:
-assetPath       = 'project\\assets'
-runList         = []
-state           = {"state": False}
+assetPath                   = 'project\\assets'
+runList                     = []
+state                       = {"state": False}
 
-course_vars     = {}                    # Store main course checkboxes' states
-section_vars    = defaultdict(list)     # Store section checkboxes' states
+course_vars                 = {}                    # Store main course checkboxes' states
+section_vars                = defaultdict(list)     # Store section checkboxes' states
 
-ticked_courses  = []
-ticked_sections = {}
+ticked_courses              = []
+ticked_sections             = {}
 
 # Save Data Frame
 def downloadDataFrame(df):
@@ -64,10 +64,10 @@ def closeWindow(window):
 def showDataframe(frame, df):
 
     clearFrame(frame.frame_child)
-    container                = tk.Frame(frame.frame_child)
+    container                   = tk.Frame(frame.frame_child)
     container.pack(fill="both", expand=True)
 
-    tree = ttk.Treeview(container, columns=list(df.columns), show="headings")
+    tree                        = ttk.Treeview(container, columns=list(df.columns), show="headings")
 
     for col in df.columns:
         tree.heading(col, text=col)
@@ -78,10 +78,10 @@ def showDataframe(frame, df):
 
     tree.pack(fill="both", expand=True, side="left")
 
-    hsb = tk.Scrollbar(frame.frame_child, orient="horizontal", command=tree.xview)
+    hsb                         = tk.Scrollbar(frame.frame_child, orient="horizontal", command=tree.xview)
     tree.configure(xscrollcommand=hsb.set)
 
-    vsb = tk.Scrollbar(container, orient="vertical", command=tree.yview)
+    vsb                         = tk.Scrollbar(container, orient="vertical", command=tree.yview)
     tree.configure(yscrollcommand=vsb.set)
 
     vsb.place(relx=0.97, rely=0, relwidth=0.03, relheight=1.0)
@@ -246,7 +246,7 @@ def frameFill_PRIMARY(frame):
     frame.dropdown_var_2 = StringVar()
     frame.dropdown_var_2.set("Action")
 
-    options = ["Display-GPA", "Z-Test", "Student-List"]
+    options = ["Display-GPA", "Z-Test", "Student-List", "Distribution"]
     frame.dropdown_menu_2 = OptionMenu(
         frame.canvas, 
         frame.dropdown_var_2,
@@ -295,13 +295,13 @@ def showGroups(frame, sections):
 
     clearFrame(frame)
 
-    style = ttk.Style()
+    style       = ttk.Style()
     style.configure("TCheckbutton", font=("Arial", 13), background="#D9D9D9")
     style.configure("TCheckbutton", indicatorbackground="#D9D9D9", indicatorforeground="#D9D9D9")
     style.configure("Vertical.TScrollbar", troughcolor="#D9D9D9", background="#D9D9D9", arrowcolor="#D9D9D9")
 
     def toggle_sections(course):
-        state = course_vars[course].get()
+        state   = course_vars[course].get()
         for var in section_vars[course]:
             var.set(state)
 
@@ -312,13 +312,13 @@ def showGroups(frame, sections):
             course_vars[course].set(0)
 
     # Create a Canvas widget and a vertical Scrollbar
-    canvas = tk.Canvas(frame, height=430, width=420, bg="#D9D9D9", highlightthickness=0)
-    scrollbar = ttk.Scrollbar(frame, orient="vertical", command=canvas.yview)
+    canvas      = tk.Canvas(frame, height=430, width=420, bg="#D9D9D9", highlightthickness=0)
+    scrollbar   = ttk.Scrollbar(frame, orient="vertical", command=canvas.yview)
 
     scrollbar.pack(side="right", fill="y", pady=5)
     canvas.pack(side="left", fill="both", expand=True)
 
-    container = tk.Frame(canvas, bg="#D9D9D9")
+    container   = tk.Frame(canvas, bg="#D9D9D9")
 
     canvas.create_window((0, 0), window=container, anchor="nw")
 
@@ -329,7 +329,7 @@ def showGroups(frame, sections):
 
     for course, section_list in sections.items():
         course_vars[course] = tk.IntVar()
-        section_vars[course] = []  # Make sure it's initialized
+        section_vars[course] = []
 
         course_chk = ttk.Checkbutton(
             container, text=course, variable=course_vars[course],
@@ -356,7 +356,6 @@ def showGroups(frame, sections):
             )
             section_chk.pack(anchor="w", padx=20)
 
-    # Link the scrollbar to the canvas
     canvas.configure(yscrollcommand=scrollbar.set)
 
 def unselectAll():
@@ -379,19 +378,19 @@ def checkTicked(section_dict):
 
 # Shake animation for Data Frame
 def shakeFrame(frame, intensity=5, duration=300):
-    canvas = frame.canvas
-    widget = frame.frame_child
-    original_x = 550
-    original_y = 135
+    canvas          = frame.canvas
+    widget          = frame.frame_child
+    original_x      = 550
+    original_y      = 135
 
     if not hasattr(frame, "window_id"):
         frame.window_id = canvas.create_window(original_x, original_y, window=widget, anchor="nw")
 
-    window_id = frame.window_id
+    window_id       = frame.window_id
 
-    shake_interval = 50
-    shakes = duration // shake_interval
-    directions = [intensity, -intensity] * (shakes // 2)
+    shake_interval  = 50
+    shakes          = duration // shake_interval
+    directions      = [intensity, -intensity] * (shakes // 2)
 
     def shake(index=0):
         if index < len(directions):
@@ -406,7 +405,7 @@ def shakeFrame(frame, intensity=5, duration=300):
 # Show Graph in a frame
 def showGraph(frame, fig):
     clearFrame(frame)
-    fig_canvas = FigureCanvasTkAgg(fig, master=frame)
-    fig_widget = fig_canvas.get_tk_widget()
+    fig_canvas      = FigureCanvasTkAgg(fig, master=frame)
+    fig_widget      = fig_canvas.get_tk_widget()
     fig_widget.pack(fill="both", expand=True)
     fig_canvas.draw()

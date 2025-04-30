@@ -36,42 +36,42 @@ def grade_to_gpa(grade):
     
 # Calculates z-score from raw dataframe & GPA dataframe
 def calculateZScores(df, course_dict, gpa_df):
-    result = []
+    result                      = []
 
     for course, sections in course_dict.items():
-        course_df = gpa_df[gpa_df['Class'] == course]
+        course_df               = gpa_df[gpa_df['Class'] == course]
         
-        course_avg = course_df['Average'].mean()
-        course_std = course_df['Average'].std()
+        course_avg              = course_df['Average'].mean()
+        course_std              = course_df['Average'].std()
 
         result.append([course, 'Course Average', course_avg, None])
 
         for section in sections:
-            section_df = course_df[course_df['Section'] == section]
+            section_df          = course_df[course_df['Section'] == section]
             
-            section_avg = section_df['Average'].values[0]
+            section_avg         = section_df['Average'].values[0]
             
             if course_std > 0:
-                section_zscore = (section_avg - course_avg) / course_std
+                section_zscore  = (section_avg - course_avg) / course_std
             else:
-                section_zscore = None
+                section_zscore  = None
 
             result.append([course, section, section_avg, section_zscore])
 
-    result_df = pd.DataFrame(result, columns=['Class', 'Section', 'GPA', 'Z-Score'])
+    result_df                   = pd.DataFrame(result, columns=['Class', 'Section', 'GPA', 'Z-Score'])
     
     return result_df
 
 # Creates graph for z-score dataframe
 def createZScoreGraph(df):
-    df = df.dropna(subset=["Z-Score"])
+    df              = df.dropna(subset=["Z-Score"])
 
-    x_labels = []
-    z_scores = []
-    colors = []
+    x_labels        = []
+    z_scores        = []
+    colors          = []
 
-    color_cycle = itertools.cycle(plt.cm.tab10.colors)
-    class_colors = {}
+    color_cycle     = itertools.cycle(plt.cm.tab10.colors)
+    class_colors    = {}
 
     for _, row in df.iterrows():
         course = row["Class"]

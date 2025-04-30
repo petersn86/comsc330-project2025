@@ -13,11 +13,11 @@ import math
 
 # Create Good and Work lists from raw data frame
 def classify_students(df, sections_dict):
-    good_grades = {'A', 'A-'}
-    work_grades = {'D+', 'D', 'D-', 'F'}
+    good_grades             = {'A', 'A-'}
+    work_grades             = {'D+', 'D', 'D-', 'F'}
     
-    good_list = []
-    work_list = []
+    good_list               = []
+    work_list               = []
     
     for course, sections in sections_dict.items():
         filtered_df = df[df['Section'].isin(sections)]
@@ -31,8 +31,8 @@ def classify_students(df, sections_dict):
     good_df = pd.DataFrame(good_list, columns=['Name', 'ID',  'Grade', 'Class'])
     work_df = pd.DataFrame(work_list, columns=['Name', 'ID',  'Grade', 'Class'])
 
-    good_df['Category'] = 'Good'
-    work_df['Category'] = 'Work'
+    good_df['Category']     = 'Good'
+    work_df['Category']     = 'Work'
 
     return good_df, work_df
 
@@ -40,8 +40,8 @@ def classify_students(df, sections_dict):
 def merge_duplicate_students(df):
     grouped = df.groupby('ID')
 
-    good_list = []
-    work_list = []
+    good_list               = []
+    work_list               = []
 
     for student_id, group in grouped:
         categories = set(group['Category'])
@@ -75,22 +75,22 @@ def merge_duplicate_students(df):
 
 # Creates graph for Students List dataframe
 def plotStudentCharts(df):
-    df = df.assign(Class=df['Class'].str.split(', ')).explode('Class')
+    df                  = df.assign(Class=df['Class'].str.split(', ')).explode('Class')
 
-    grouped = df.groupby(['Class', 'Category']).size().unstack(fill_value=0)
+    grouped             = df.groupby(['Class', 'Category']).size().unstack(fill_value=0)
 
-    num_classes = len(grouped)
-    cols = 3
-    rows = math.ceil(num_classes / cols)
+    num_classes         = len(grouped)
+    cols                = 3
+    rows                = math.ceil(num_classes / cols)
 
-    fig, axes = plt.subplots(rows, cols, figsize=(5 * cols, 5 * rows))
-    axes = axes.flatten()
+    fig, axes           = plt.subplots(rows, cols, figsize=(5 * cols, 5 * rows))
+    axes                = axes.flatten()
 
     for ax, (cls, counts) in zip(axes, grouped.iterrows()):
-        labels = [f"{cat}: {count}" for cat, count in counts.items()]
+        labels          = [f"{cat}: {count}" for cat, count in counts.items()]
         ax.pie(counts,
-               labels=labels,
-               startangle=90,
+               labels       =labels,
+               startangle   =90,
                labeldistance=1.1,
                colors=['#66bb6a', '#ef5350'])
         ax.set_title(f"{cls}", fontsize=12, y=1.05, ha='center')  # Center title above pie

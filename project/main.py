@@ -14,10 +14,10 @@ import pandas   as    pd
 from build_gui import Tk, messagebox, defaultdict
 
 # Build Starting Window
-window_start            = Tk()
-frame_1                 = build_gui.buildFrame(window_start)
-build_gui.folderPath    = ''
-sections                = {}
+window_start                    = Tk()
+frame_1                         = build_gui.buildFrame(window_start)
+build_gui.folderPath            = ''
+sections                        = {}
 
 window_start.geometry("800x600")
 window_start.configure(bg="#FFFFFF")
@@ -28,9 +28,9 @@ build_gui.frameFill_START(frame_1)
 window_start.title("Welcome!")
 window_start.mainloop()
 
-#Build Main Window (after RUN selection)
-window_main             = Tk()
-frame_2                 = build_gui.buildFrame(window_main)
+# Build Main Window (after RUN selection)
+window_main                     = Tk()
+frame_2                         = build_gui.buildFrame(window_main)
 
 window_main.geometry("1080x740")
 window_main.configure(bg="#FFFFFF")
@@ -60,8 +60,8 @@ def runGPACalc():
         messagebox.showinfo("Stop!", "Please Select One of the Sections for this Action")
         return
     build_gui.checkTicked(sections)
-    gpa_df = gpa_calculator.calcGPA(df, build_gui.ticked_sections)
-    fig    = gpa_calculator.createGPAGraph(gpa_df)
+    gpa_df                      = gpa_calculator.calcGPA(df, build_gui.ticked_sections)
+    fig                         = gpa_calculator.createGPAGraph(gpa_df)
     build_gui.showDataframe(frame_2, gpa_df)
     build_gui.showGraph(frame_2.graph_frame, fig)
     build_gui.shakeFrame(frame_2)
@@ -76,9 +76,9 @@ def runStudentList():
             return
     build_gui.checkTicked(sections)
     good_df, work_df = student_list.classify_students(df, build_gui.ticked_sections)
-    concat = pd.concat([good_df, work_df], ignore_index=True)
-    final  = student_list.merge_duplicate_students(concat)
-    fig    = student_list.plotStudentCharts(final)
+    concat                      = pd.concat([good_df, work_df], ignore_index=True)
+    final                       = student_list.merge_duplicate_students(concat)
+    fig                         = student_list.plotStudentCharts(final)
     build_gui.showDataframe(frame_2, final)
     build_gui.shakeFrame(frame_2)
     build_gui.showGraph(frame_2.graph_frame, fig)
@@ -98,6 +98,21 @@ def runZTest():
     build_gui.showDataframe(frame_2, z_df)
     build_gui.showGraph(frame_2.graph_frame, fig)
     build_gui.shakeFrame(frame_2)
+
+def runDistribution():
+    build_gui.ticked_courses    = []
+    build_gui.ticked_sections   = {}
+    selected_count              = sum(var.get() for course in build_gui.section_vars for var in build_gui.section_vars[course])
+    if selected_count == 0:
+        messagebox.showinfo("Stop!", "Please Select One of the Sections for this Action")
+        return
+    build_gui.checkTicked(sections)
+    dist_df                     = gpa_calculator.calcGradeDistribution(df, build_gui.ticked_sections)
+    fig                         = gpa_calculator.createGradeDistributionGraph(dist_df)
+    build_gui.showDataframe(frame_2, dist_df)
+    build_gui.showGraph(frame_2.graph_frame, fig)
+    build_gui.shakeFrame(frame_2)
+
     
 # Set functionalities into single function
 def runAction(*args):
@@ -107,6 +122,8 @@ def runAction(*args):
         runGPACalc()
     elif frame_2.dropdown_var_2.get() == "Student-List":
         runStudentList()
+    elif frame_2.dropdown_var_2.get() == "Distribution":
+        runDistribution()
 
 # Set RUN functionality into RUN Dropdown
 frame_2.dropdown_var.trace("w", runSelect)
