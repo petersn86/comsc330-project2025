@@ -1,1 +1,41 @@
 /project/__pycache__
+
+# PyInstaller build folders
+build/
+dist/
+*.spec
+
+# Virtual environment
+venv/
+.env/
+.venv/
+
+# macOS / Windows / Linux OS junk
+.DS_Store
+Thumbs.db
+desktop.ini
+ 
+# VSCode / PyCharm / JetBrains IDEs
+.vscode/
+.idea/
+
+# Logs or debug files
+*.log
+
+# Test output or temp files
+*.tmp
+*.bak
+*.swp
+
+# ZIPs or generated EXEs (optional)
+*.zip
+*.exe
+
+# Test output or temp files
+*.tmp
+*.bak
+*.swp
+
+# ZIPs or generated EXEs
+*.zip
+*.exe

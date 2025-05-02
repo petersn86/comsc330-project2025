@@ -7,13 +7,21 @@
 #--------------------------------------------------------------------
 import tkinter as tk
 from tkinter import filedialog, Frame, Tk, Canvas, Button, PhotoImage, StringVar, OptionMenu, ttk, messagebox
-import os
+import sys, os
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from collections import defaultdict
 
+# Get absolute path to resource with Pyinstaller
+def resource_path(relative_path):
+    try:
+        base_path = sys._MEIPASS  # PyInstaller sets this
+    except AttributeError:
+        base_path = os.path.abspath(".")
+
+    return os.path.join(base_path, relative_path)
 
 # Variables:
-assetPath                   = 'project\\assets'
+assetPath                   = resource_path('project/assets')
 runList                     = []
 state                       = {"state": False}
 
@@ -161,7 +169,7 @@ def frameFill_START(frame):
     )
 
     # BUTTON 1 (handles folder path selection)
-    frame.button_image_1 = PhotoImage(file=assetPath + '\\button_1.png')
+    frame.button_image_1 = PhotoImage(file=os.path.join(assetPath, 'button_1.png'))
     frame.button_1 = Button(
         frame, image=frame.button_image_1, borderwidth=0, highlightthickness=0,
         bg="#FFFFFF", command= lambda: openFolder(frame), relief="flat"
@@ -169,7 +177,7 @@ def frameFill_START(frame):
     frame.button_1.place(x=304.0, y=218.0, width=179.0, height=67.0)
 
     # BUTTON 2 (handles transition to primary frame)
-    frame.button_image_2 = PhotoImage(file=assetPath + '\\button_2.png')
+    frame.button_image_2 = PhotoImage(file=os.path.join(assetPath, 'button_2.png'))
     frame.button_2 = Button(
         frame, image=frame.button_image_2, borderwidth=0, highlightthickness=0,
         bg="#FFFFFF", command= lambda: (searchPath(folderPath, runList), closeWindow(frame.winfo_toplevel())), relief="flat"
@@ -267,7 +275,7 @@ def frameFill_PRIMARY(frame):
 
     frame.canvas.create_window(910.0, 70.0, window=frame.dropdown_menu_2, anchor="nw") # Place using create_window
 
-    frame.image_ref     = PhotoImage(file=assetPath + '\\image_1.png')
+    frame.image_ref     = PhotoImage(file=os.path.join(assetPath, 'image_1.png'))
     frame.canvas.create_image(252.0, 450.0, image=frame.image_ref)
 
     frame.image_frame   = tk.Frame(frame.canvas, width=440, height=430, bg="#D9D9D9")
@@ -281,7 +289,7 @@ def frameFill_PRIMARY(frame):
     frame.canvas.create_window(30.0, 750.0, window=frame.graph_frame, anchor="nw")
 
     # BUTTON 4 (handles dataframe download)
-    frame.button_image_4 = PhotoImage(file=assetPath + '\\button_4.png')
+    frame.button_image_4 = PhotoImage(file=os.path.join(assetPath, 'button_4.png'))
     frame.button_4 = Button(
         frame.canvas, image=frame.button_image_4, borderwidth=0, highlightthickness=0,
         bg="#FFFFFF", command= None, relief="flat"
