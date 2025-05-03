@@ -30,6 +30,7 @@ section_vars                = defaultdict(list)     # Store section checkboxes' 
 
 ticked_courses              = []
 ticked_sections             = {}
+current                     = []
 
 # Save Data Frame
 def downloadDataFrame(df):
@@ -195,17 +196,6 @@ def frameFill_PRIMARY(frame):
 
     frame.canvas.place(x=0, y=0)
 
-    # Add scrollbars
-    vsb = tk.Scrollbar(frame, orient="vertical", command=frame.canvas.yview)
-    vsb.place(relx=1.0, rely=0.0, relheight=1.0, anchor='ne')
-    frame.canvas.configure(yscrollcommand=vsb.set)
-    
-    hsb = tk.Scrollbar(frame, orient="horizontal", command=frame.canvas.xview)
-    hsb.place(relx=0.0, rely=1.0, relwidth=1.0, anchor='sw')
-    frame.canvas.configure(xscrollcommand=hsb.set)
-
-    frame.canvas.config(scrollregion=(0, 0, 4000, 4000)) 
-
     frame.canvas.create_rectangle(
         0.0, 0.0, 20000.0, 111.0, fill="#D9D9D9", outline=""
     )
@@ -275,6 +265,31 @@ def frameFill_PRIMARY(frame):
 
     frame.canvas.create_window(910.0, 70.0, window=frame.dropdown_menu_2, anchor="nw") # Place using create_window
 
+    frame.dropdown_var_3 = StringVar()
+    frame.dropdown_var_3.set("Advanced")
+
+    advanced_options = ["View Graph", "Manage History"]
+    frame.dropdown_menu_3 = OptionMenu(
+        frame.canvas, 
+        frame.dropdown_var_3,
+        *advanced_options
+    )
+
+    frame.dropdown_menu_3.config(
+        font=("Arial", 8),
+        bg="#F0F0F0",
+        fg="#333333",
+        activebackground="#545454",
+        activeforeground="white",
+        relief="flat",
+        highlightthickness=0,
+        bd=2,
+        width=8
+    )
+
+    frame.canvas.create_window(910.0, 20.0, window=frame.dropdown_menu_3, anchor="nw") 
+
+
     frame.image_ref     = PhotoImage(file=os.path.join(assetPath, 'image_1.png'))
     frame.canvas.create_image(252.0, 450.0, image=frame.image_ref)
 
@@ -284,9 +299,6 @@ def frameFill_PRIMARY(frame):
     frame.frame_child   = tk.Frame(frame.canvas, bg="#D9D9D9", width=500, height=540)
     frame.frame_child.propagate(False)
     frame.canvas.create_window(550.0, 135.0, window=frame.frame_child, anchor="nw")
-
-    frame.graph_frame   = tk.Frame(frame.canvas, bg="#D9D9D9", width= 1020, height= 600)
-    frame.canvas.create_window(30.0, 750.0, window=frame.graph_frame, anchor="nw")
 
     # BUTTON 4 (handles dataframe download)
     frame.button_image_4 = PhotoImage(file=os.path.join(assetPath, 'button_4.png'))
@@ -417,3 +429,18 @@ def showGraph(frame, fig):
     fig_widget      = fig_canvas.get_tk_widget()
     fig_widget.pack(fill="both", expand=True)
     fig_canvas.draw()
+
+def openGraphWindow(window):
+    if current:
+        sub = tk.Toplevel(window)
+        sub.iconbitmap(file=os.path.join(assetPath, 'logo.jpg'))
+        sub.title("View Graph")
+        sub.geometry("1080x700")
+
+        graph_frame   = tk.Frame(sub, bg="#D9D9D9", width= 1020, height= 600)
+        graph_frame.place(relx=0.5, rely=0.5, anchor="center")
+        showGraph(graph_frame, current[0])
+    else:
+        messagebox.showinfo("Stop!", "Please Select an Action")
+
+
