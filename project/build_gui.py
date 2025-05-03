@@ -196,6 +196,10 @@ def frameFill_PRIMARY(frame):
 
     frame.canvas.place(x=0, y=0)
 
+    vsb = tk.Scrollbar(frame, orient="vertical", command=frame.canvas.yview)
+    vsb.place(relx=1.0, rely=0.0, relheight=1.0, anchor='ne')
+    frame.canvas.configure(yscrollcommand=vsb.set)
+
     frame.canvas.create_rectangle(
         0.0, 0.0, 20000.0, 111.0, fill="#D9D9D9", outline=""
     )
@@ -308,6 +312,9 @@ def frameFill_PRIMARY(frame):
     )
 
     frame.canvas.create_window(450 + 500 - frame.button_4.winfo_width(), 130 + 540 + 10, window=frame.button_4, anchor="nw")
+
+    frame.canvas.config(scrollregion=(0, 0, 1500, 1500))
+
 
 # Show Groups in frame from RUN file
 def showGroups(frame, sections):
@@ -433,14 +440,28 @@ def showGraph(frame, fig):
 def openGraphWindow(window):
     if current:
         sub = tk.Toplevel(window)
-        sub.iconbitmap(file=os.path.join(assetPath, 'logo.jpg'))
         sub.title("View Graph")
         sub.geometry("1080x700")
 
-        graph_frame   = tk.Frame(sub, bg="#D9D9D9", width= 1020, height= 600)
-        graph_frame.place(relx=0.5, rely=0.5, anchor="center")
+        outer_frame = tk.Frame(sub)
+        outer_frame.pack(fill="both", expand=True)
+
+        canvas = tk.Canvas(outer_frame, bg="#FFFFFF")
+        canvas.pack(side="left", fill="both", expand=True)
+
+        h_scroll = tk.Scrollbar(sub, orient="horizontal", command=canvas.xview)
+        h_scroll.pack(side="bottom", fill="x")
+        canvas.configure(xscrollcommand=h_scroll.set)
+
+        graph_frame = tk.Frame(canvas, bg="#FFFFFF")
+        canvas_window = canvas.create_window((0, 0), window=graph_frame, anchor="nw")
+
+        def on_configure(event):
+            canvas.configure(scrollregion=canvas.bbox("all"))
+
+        graph_frame.bind("<Configure>", on_configure)
+
         showGraph(graph_frame, current[0])
     else:
         messagebox.showinfo("Stop!", "Please Select an Action")
-
 

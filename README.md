@@ -17,3 +17,6 @@ Software should also be able to find the GPA for different sections
 
 ### 2. Historical Tracking
 - The system must track if a student has ever appeared on either the **Good List** or the **Work List** in past records.
+
+## Required Installations
+- Installation of matplotlib, scipy, & pyarrow required
